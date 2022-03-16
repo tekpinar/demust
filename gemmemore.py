@@ -1,8 +1,13 @@
+from ctypes import alignment
+from lib2to3.pgen2.token import EQUAL
 import os
 import sys
+import argparse
 import numpy as np
 import matplotlib.pylab as plt
 
+alphabeticalAminoAcidsList = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
+                              'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
 def parseGEMMEoutput(inputFile):
     """
         Parse normalized (I don't know how?!) GEMME output files: 
@@ -10,8 +15,8 @@ def parseGEMMEoutput(inputFile):
         Return: Data File as a Numpy array, where each col contains 
         deleteriousness score for an amino acid.
     """
-    gemmeDataFile =open(inputFile, 'r')
-    allLines = gemmeDataFile.readlines()
+    #gemmeDataFile =open(inputFile, 'r')
+    allLines = inputFile.readlines()
     headerLine = allLines[0]
     print(headerLine)
     gemmeData = []
@@ -28,28 +33,102 @@ def parseGEMMEoutput(inputFile):
                 tempList.append(float(item))
         gemmeData.append(tempList)
 
-    gemmeDataFile.close()
+    inputFile.close()
     print(gemmeData[0])
     mutationsData = np.array(gemmeData)
     # mutatedTransposed = mutationsData.T
     # return mutatedTransposed
     return mutationsData
 
-def plotGEMMEmatrix(gemmeData):
+def plotGEMMEmatrix(gemmeData, outFile, offSet=0):
     """
         A test to plot a better GEMME matrix
     """
-    fig = plt.figure(figsize=(17, 7))
   
-    #print(len(gemmeData[0]))
+    nres_shown = len(gemmeData[0])
+    fig_height=8
+    # figure proportions
+    fig_width = fig_height/2  # inches
+    fig_width *= nres_shown/20
+    
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+  
+    ##########################################################################
+    # Set plotting parameters
+    majorTics = 50
+    major_nums_x = np.arange(majorTics, len(gemmeData[0]), majorTics, dtype=int)
+    major_nums_x = major_nums_x -1
+    major_nums_x = np.insert(major_nums_x, 0, 0)
+    # print(major_nums_x)
 
-    # import seaborn as snb
-    # snb.heatmap(gemmeData)
-    plt.imshow(gemmeData, cmap='bwr')
+    minor_nums_x = np.arange(10, len(gemmeData[0]), 10, dtype=int)
+    minor_nums_x = minor_nums_x - 1
+    minor_nums_x = np.insert(minor_nums_x, 0, 0)
+    print(minor_nums_x)
 
+    major_labels_x = major_nums_x + 1 + offSet
+
+    major_nums_y = np.arange(0, 20, 1, dtype=int)
+    major_labels_y = alphabeticalAminoAcidsList
+
+    plt.xticks(major_nums_x, major_labels_x, size=28)
+    ax.set_xticks(minor_nums_x, minor=True)
+    
+    plt.yticks(major_nums_y, major_labels_y, size=28)
+    ax.set_yticklabels(major_labels_y, ha='left')
+    ax.tick_params(axis='y', which='major', pad=30)
+
+    #############################################################################
+    plt.imshow(gemmeData, cmap='coolwarm_r', aspect=3.0)
+
+    #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     plt.tight_layout()
+    plt.savefig(outFile)
     plt.show()
+    
+
+    #plt.imsave('output.png', gemmeData)
     plt.close()
+
+def parseRHAPSODYoutput(inputFile):
+    """
+        Parse RHAPSODY output files
+
+    Parameters
+    ----------
+    inputFile: string
+        Name of the Rhapsody output file 
+
+    Returns
+    -------
+    Data as a Numpy array, where each col contains 
+        deleteriousness score for an amino acid mutation.
+    """
+    #gemmeDataFile =open(inputFile, 'r')
+    allLines = inputFile.readlines()
+    headerLine = allLines[0]
+    print(headerLine)
+    gemmeData = []
+    aaColumn = []
+    tempList = []
+    for line in allLines[1:]:
+
+        data = line.split()
+        if(data[0] != '#'):
+            print(data[10])
+            if (data[10] == 'nan'):
+                tempList.append(0.0000000)
+            else:
+                tempList.append(float(data[10]))
+        
+    gemmeData.append(np.reshape(tempList, (20, 781)))
+
+    inputFile.close()
+    print(gemmeData[0])
+    mutationsData = np.array(gemmeData)
+    # mutatedTransposed = mutationsData.T
+    # return mutatedTransposed
+    return mutationsData
 
 def getGEMMEAverages(gemmeData):
     """
@@ -114,15 +193,32 @@ def plotGEMME2DvsOther(gemme2DData, other2DData, \
 
 if (__name__ == '__main__'):
 
-    gemmeData = parseGEMMEoutput(sys.argv[1])
+    parser = argparse.ArgumentParser(description='GEMMEMORE: A Python package to modify and annotate GEMME results')
+    parser.add_argument('-i', '--inputfile', dest='inputfile', type=argparse.FileType('r'), help='One of the output files of gemme, rhapsody or evmutation', required=True, default=None)
+    parser.add_argument('-d', '--datatype', dest='datatype', type=str, help='gemme, rhapsody or evmutation', required=False, default='gemme')
+    parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, help='Name of the output png file', required=False, default='output.png')
+   
+    args = parser.parse_args()
+    if args.inputfile == None:
+        print('Usage: python gemmemore.py [-h] [-i INPUTFILE] [-d GEMME]')
+        print('\nError: missing arguments: Please provide --inputfile and/or --datatype')
+        sys.exit(1)
 
-    plotGEMMEmatrix(gemmeData)
+    if (args.datatype.lower()=='gemme'):
+        gemmeData = parseGEMMEoutput(args.inputfile)
+        plotGEMMEmatrix(gemmeData, args.outputfile, offSet=413)
 
-    gemmeAverages = getGEMMEAverages(gemmeData.T)
+    elif (args.datatype.lower()=='rhapsody' or 'rapsody'):
+        rhapsodyData = parseRHAPSODYoutput(args.inputfile)
+        #plotRHAPSODYmatrix(rhapsodyData, args.outputfile, offSet=413)
+
+    print(rhapsodyData)
+
+    # gemmeAverages = getGEMMEAverages(gemmeData.T)
     
-    #Read PRS data
-    prsData = parsePRSdata(sys.argv[2])
+    # #Read PRS data
+    # prsData = parsePRSdata(sys.argv[2])
 
-    plotGEMME2DvsOther(gemmeAverages, prsData, \
-                        customColor=sys.argv[3], \
-                        figName=sys.argv[4])
+    # plotGEMME2DvsOther(gemmeAverages, prsData, \
+    #                     customColor=sys.argv[3], \
+    #                     figName=sys.argv[4])
