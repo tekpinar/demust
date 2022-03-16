@@ -1,5 +1,3 @@
-from ctypes import alignment
-from lib2to3.pgen2.token import EQUAL
 import os
 import sys
 import argparse
@@ -15,11 +13,12 @@ def parseGEMMEoutput(inputFile):
         Return: Data File as a Numpy array, where each col contains 
         deleteriousness score for an amino acid.
     """
-    #gemmeDataFile =open(inputFile, 'r')
-    allLines = inputFile.readlines()
+    gemmeDataFile =open(inputFile, 'r')
+    allLines = gemmeDataFile.readlines()
+    gemmeDataFile.close()
     headerLine = allLines[0]
     print(headerLine)
-    gemmeData = []
+    matrixData = []
     aaColumn = []
     for line in allLines[1:]:
         tempList = []
@@ -31,16 +30,14 @@ def parseGEMMEoutput(inputFile):
                 tempList.append(0.0000000)
             else:
                 tempList.append(float(item))
-        gemmeData.append(tempList)
+        matrixData.append(tempList)
 
-    inputFile.close()
-    print(gemmeData[0])
-    mutationsData = np.array(gemmeData)
+    mutationsData = np.array(matrixData)
     # mutatedTransposed = mutationsData.T
     # return mutatedTransposed
     return mutationsData
 
-def plotGEMMEmatrix(gemmeData, outFile, offSet=0):
+def plotGEMMEmatrix(gemmeData, outFile, colorMap = 'coolwarm', offSet=0):
     """
         A test to plot a better GEMME matrix
     """
@@ -79,7 +76,7 @@ def plotGEMMEmatrix(gemmeData, outFile, offSet=0):
     ax.tick_params(axis='y', which='major', pad=30)
 
     #############################################################################
-    plt.imshow(gemmeData, cmap='coolwarm_r', aspect=3.0)
+    plt.imshow(gemmeData, cmap=colorMap, aspect=3.0)
 
     #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     plt.tight_layout()
@@ -90,7 +87,7 @@ def plotGEMMEmatrix(gemmeData, outFile, offSet=0):
     #plt.imsave('output.png', gemmeData)
     plt.close()
 
-def parseRHAPSODYoutput(inputFile):
+def parseRHAPSODYoutput(inputFile, field=10):
     """
         Parse RHAPSODY output files
 
@@ -104,28 +101,49 @@ def parseRHAPSODYoutput(inputFile):
     Data as a Numpy array, where each col contains 
         deleteriousness score for an amino acid mutation.
     """
-    #gemmeDataFile =open(inputFile, 'r')
-    allLines = inputFile.readlines()
-    headerLine = allLines[0]
-    print(headerLine)
-    gemmeData = []
-    aaColumn = []
-    tempList = []
-    for line in allLines[1:]:
+    rhapsodyDataFile=open(inputFile, 'r')
+    allLines = rhapsodyDataFile.readlines()
+    rhapsodyDataFile.close()
+    matrixData = []
 
-        data = line.split()
-        if(data[0] != '#'):
-            print(data[10])
-            if (data[10] == 'nan'):
-                tempList.append(0.0000000)
-            else:
-                tempList.append(float(data[10]))
+    if (allLines[0][0]=='#'):
+        print(allLines[0])
+        del allLines[0]
+
+    seqLength = int(len(allLines)/19)
+    for i in range (0, seqLength):
+
+        #Determine the missing amino acid and its index
+        missingAminoAcidsList = []
+        for j in range (0, 19):
+            print(i*19+j)
+            data = allLines[i*19+j].split()
+            #print(data)
+            missingAminoAcidsList.append(data[3])
         
-    gemmeData.append(np.reshape(tempList, (20, 781)))
+        # print(missingAminoAcidsList)
+        missing = set(alphabeticalAminoAcidsList).difference(missingAminoAcidsList)
+        # print(missing)
+        missingIndex = alphabeticalAminoAcidsList.index(str(list(missing)[0]))
+        # print(missingIndex)
 
-    inputFile.close()
-    print(gemmeData[0])
-    mutationsData = np.array(gemmeData)
+
+        #Read the data and append it to a temporary list
+        tempList = []
+        for j in range (0, 19):
+            data = allLines[i*19+j].split()
+            if (data[field] == 'nan'):
+                tempList.append(0.000)
+            else:
+                tempList.append(float(data[field]))
+        
+        
+        
+        #Fill the index location for the missing amino acid. 
+        tempList.insert(missingIndex, 0.000)
+        matrixData.append(tempList)            
+
+    mutationsData = np.array(matrixData).T
     # mutatedTransposed = mutationsData.T
     # return mutatedTransposed
     return mutationsData
@@ -194,9 +212,21 @@ def plotGEMME2DvsOther(gemme2DData, other2DData, \
 if (__name__ == '__main__'):
 
     parser = argparse.ArgumentParser(description='GEMMEMORE: A Python package to modify and annotate GEMME results')
-    parser.add_argument('-i', '--inputfile', dest='inputfile', type=argparse.FileType('r'), help='One of the output files of gemme, rhapsody or evmutation', required=True, default=None)
-    parser.add_argument('-d', '--datatype', dest='datatype', type=str, help='gemme, rhapsody or evmutation', required=False, default='gemme')
-    parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, help='Name of the output png file', required=False, default='output.png')
+    parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
+        help='One of the output files of gemme, rhapsody or evmutation', \
+        required=True, default=None)
+
+    parser.add_argument('-d', '--datatype', dest='datatype', type=str, \
+        help='gemme, rhapsody or evmutation', \
+        required=False, default='gemme')
+
+    parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
+        help='Name of the output png file', \
+        required=False, default='output.png')
+
+    parser.add_argument('--offset', dest='offset', type=int, \
+        help='An integer value to offset the xlabels for incomplete sequences',
+        required=False, default=0)
    
     args = parser.parse_args()
     if args.inputfile == None:
@@ -206,14 +236,14 @@ if (__name__ == '__main__'):
 
     if (args.datatype.lower()=='gemme'):
         gemmeData = parseGEMMEoutput(args.inputfile)
-        plotGEMMEmatrix(gemmeData, args.outputfile, offSet=413)
+        plotGEMMEmatrix(gemmeData, args.outputfile, colorMap='coolwarm_r', offSet=args.offset)
 
     elif (args.datatype.lower()=='rhapsody' or 'rapsody'):
         rhapsodyData = parseRHAPSODYoutput(args.inputfile)
-        #plotRHAPSODYmatrix(rhapsodyData, args.outputfile, offSet=413)
-
-    print(rhapsodyData)
-
+        plotGEMMEmatrix(rhapsodyData, args.outputfile, colorMap='coolwarm', offSet=args.offset)
+    else:
+        print("\nError: Unknown data type!")
+        print("         Data types can only be gemme or rhapsody!")
     # gemmeAverages = getGEMMEAverages(gemmeData.T)
     
     # #Read PRS data
