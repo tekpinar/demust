@@ -37,9 +37,36 @@ def parseGEMMEoutput(inputFile):
     # return mutatedTransposed
     return mutationsData
 
-def plotGEMMEmatrix(gemmeData, outFile, colorMap = 'coolwarm', offSet=0):
+def plotGEMMEmatrix(gemmeData, outFile, colorMap = 'coolwarm', \
+                    offSet=0, pixelType='square'):
     """
         A test to plot a better GEMME matrix
+  
+    Parameters
+    ----------
+    gemmeData: numpy array of arrays
+        Data matrix to plot
+
+    outFile: string
+        Name of the output png image
+    
+    colorMap: matplotlib cmap
+        Any colormap existing in matplotlib.
+        Default is coolwarm. 
+
+    offSet: int
+        It is used to match the residue IDs in your PDB
+        file with 0 based indices read from gemmeData matrix
+
+    pixelType: string
+        It can only have 'square' or 'rectangle' values.
+        It is a matter of taste but I added it as an option.
+        Default is 'square'
+
+    Returns
+    -------
+    Nothing
+
     """
   
     nres_shown = len(gemmeData[0])
@@ -76,7 +103,15 @@ def plotGEMMEmatrix(gemmeData, outFile, colorMap = 'coolwarm', offSet=0):
     ax.tick_params(axis='y', which='major', pad=30)
 
     #############################################################################
-    plt.imshow(gemmeData, cmap=colorMap)
+    if(pixelType=='square'):
+        #For plotting square pixels
+        plt.imshow(gemmeData, cmap=colorMap)
+    elif(pixelType=='rectangle'):
+        #For plotting rectangular pixels
+        plt.imshow(gemmeData, cmap=colorMap, aspect=3.0)
+    else:
+        print("\nERROR: Unknown pixelType specified!\n")
+        sys.exit(-1)
 
     #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     plt.tight_layout()
@@ -239,11 +274,13 @@ if (__name__ == '__main__'):
 
     if (args.datatype.lower()=='gemme'):
         gemmeData = parseGEMMEoutput(args.inputfile)
-        plotGEMMEmatrix(gemmeData, args.outputfile, colorMap='coolwarm_r', offSet=args.offset)
+        plotGEMMEmatrix(gemmeData, args.outputfile, colorMap='coolwarm_r', \
+            offSet=args.offset, pixelType='square')
 
     elif (args.datatype.lower()=='rhapsody' or 'rapsody'):
         rhapsodyData = parseRHAPSODYoutput(args.inputfile, field=args.field)
-        plotGEMMEmatrix(rhapsodyData, args.outputfile, colorMap='coolwarm', offSet=args.offset)
+        plotGEMMEmatrix(rhapsodyData, args.outputfile, colorMap='coolwarm', \
+            offSet=args.offset, pixelType='square')
     else:
         print("\nError: Unknown data type!")
         print("         Data types can only be gemme or rhapsody!")
