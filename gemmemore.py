@@ -71,12 +71,12 @@ def plotGEMMEmatrix(gemmeData, outFile, colorMap = 'coolwarm', offSet=0):
     plt.xticks(major_nums_x, major_labels_x, size=28)
     ax.set_xticks(minor_nums_x, minor=True)
     
-    plt.yticks(major_nums_y, major_labels_y, size=28)
+    plt.yticks(major_nums_y, major_labels_y, size=16)
     ax.set_yticklabels(major_labels_y, ha='left')
     ax.tick_params(axis='y', which='major', pad=30)
 
     #############################################################################
-    plt.imshow(gemmeData, cmap=colorMap, aspect=3.0)
+    plt.imshow(gemmeData, cmap=colorMap)
 
     #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     plt.tight_layout()
@@ -227,6 +227,9 @@ if (__name__ == '__main__'):
     parser.add_argument('--offset', dest='offset', type=int, \
         help='An integer value to offset the xlabels for incomplete sequences',
         required=False, default=0)
+    parser.add_argument('--field', dest='field', type=int, \
+        help='An integer value starting from 0 for reading the rhapsody output',
+        required=False, default=10)
    
     args = parser.parse_args()
     if args.inputfile == None:
@@ -239,7 +242,7 @@ if (__name__ == '__main__'):
         plotGEMMEmatrix(gemmeData, args.outputfile, colorMap='coolwarm_r', offSet=args.offset)
 
     elif (args.datatype.lower()=='rhapsody' or 'rapsody'):
-        rhapsodyData = parseRHAPSODYoutput(args.inputfile)
+        rhapsodyData = parseRHAPSODYoutput(args.inputfile, field=args.field)
         plotGEMMEmatrix(rhapsodyData, args.outputfile, colorMap='coolwarm', offSet=args.offset)
     else:
         print("\nError: Unknown data type!")
