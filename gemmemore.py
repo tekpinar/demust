@@ -1,4 +1,5 @@
 import os
+import string
 import sys
 import argparse
 import numpy as np
@@ -37,14 +38,14 @@ def parseGEMMEoutput(inputFile):
     # return mutatedTransposed
     return mutationsData
 
-def plotGEMMEmatrix(gemmeData, outFile, colorMap = 'coolwarm', \
-                    offSet=0, pixelType='square'):
+def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
+                    colorMap = 'coolwarm', offSet=0, pixelType='square'):
     """
-        A test to plot a better GEMME matrix
+        A function to plot deep mutational scanning matrices. 
   
     Parameters
     ----------
-    gemmeData: numpy array of arrays
+    scanningMatrix: numpy array of arrays
         Data matrix to plot
 
     outFile: string
@@ -56,7 +57,7 @@ def plotGEMMEmatrix(gemmeData, outFile, colorMap = 'coolwarm', \
 
     offSet: int
         It is used to match the residue IDs in your PDB
-        file with 0 based indices read from gemmeData matrix
+        file with 0 based indices read from scanningMatrix matrix
 
     pixelType: string
         It can only have 'square' or 'rectangle' values.
@@ -68,27 +69,43 @@ def plotGEMMEmatrix(gemmeData, outFile, colorMap = 'coolwarm', \
     Nothing
 
     """
-  
-    nres_shown = len(gemmeData[0])
+
+    #We subtract 1 from beg bc matrix indices starts from 0
+    if(end == None):
+        end = len(scanningMatrix[0])
+
+    print("Beginning: "+str(beg))
+    print("End      : "+str(end))
+    
+    print(len(scanningMatrix[0]))
+    subMatrix = scanningMatrix[:, (beg-1):end]
+    print(subMatrix)
+
+    ##########################################################################
+    # Set plotting parameters
+    nres_shown = len(subMatrix[0])
     fig_height=8
     # figure proportions
     fig_width = fig_height/2  # inches
     fig_width *= nres_shown/20
     
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-  
-    ##########################################################################
-    # Set plotting parameters
-    majorTics = 50
-    major_nums_x = np.arange(majorTics, len(gemmeData[0]), majorTics, dtype=int)
+
+    if (nres_shown >=200):
+        majorTics = 50
+    else:
+        majorTics = 25
+
+
+    major_nums_x = np.arange(majorTics, len(subMatrix[0]), majorTics, dtype=int)
     major_nums_x = major_nums_x -1
     major_nums_x = np.insert(major_nums_x, 0, 0)
     # print(major_nums_x)
 
-    minor_nums_x = np.arange(10, len(gemmeData[0]), 10, dtype=int)
+    minor_nums_x = np.arange(10, len(subMatrix[0]), 10, dtype=int)
     minor_nums_x = minor_nums_x - 1
     minor_nums_x = np.insert(minor_nums_x, 0, 0)
-    print(minor_nums_x)
+    # print(minor_nums_x)
 
     major_labels_x = major_nums_x + 1 + offSet
 
@@ -105,10 +122,10 @@ def plotGEMMEmatrix(gemmeData, outFile, colorMap = 'coolwarm', \
     #############################################################################
     if(pixelType=='square'):
         #For plotting square pixels
-        plt.imshow(gemmeData, cmap=colorMap)
+        plt.imshow(subMatrix, cmap=colorMap)
     elif(pixelType=='rectangle'):
         #For plotting rectangular pixels
-        plt.imshow(gemmeData, cmap=colorMap, aspect=3.0)
+        plt.imshow(subMatrix, cmap=colorMap, aspect=3.0)
     else:
         print("\nERROR: Unknown pixelType specified!\n")
         sys.exit(-1)
@@ -119,7 +136,7 @@ def plotGEMMEmatrix(gemmeData, outFile, colorMap = 'coolwarm', \
     plt.show()
     
 
-    #plt.imsave('output.png', gemmeData)
+    #plt.imsave('output.png', subMatrix)
     plt.close()
 
 def parseRHAPSODYoutput(inputFile, field=10):
@@ -151,7 +168,7 @@ def parseRHAPSODYoutput(inputFile, field=10):
         #Determine the missing amino acid and its index
         missingAminoAcidsList = []
         for j in range (0, 19):
-            print(i*19+j)
+            #print(i*19+j)
             data = allLines[i*19+j].split()
             #print(data)
             missingAminoAcidsList.append(data[3])
@@ -182,6 +199,116 @@ def parseRHAPSODYoutput(inputFile, field=10):
     # mutatedTransposed = mutationsData.T
     # return mutatedTransposed
     return mutationsData
+
+def parseFOLDXoutput(inputFile, colorThreshhold=10.0, colorCorrect=True):
+    """
+        Parse FoldX output files
+
+    Parameters
+    ----------
+    inputFile: string
+        Name of the FoldX output file
+
+    colorThreshhold: float
+        If colorCorrect True, it will reduce values greater
+        than colorThreshhold to make the deep mutational scanning
+        matrices look better.
+    colorCorrect: bool
+        If True, it will change values the values greater than
+        the colorThreshold to  colorThreshold 
+
+    Returns
+    -------
+    Data as a Numpy array, where each col contains 
+        delta delta G for an amino acid mutation.
+    """
+    foldxDataFile=open(inputFile, 'r')
+    allLines = foldxDataFile.readlines()
+    foldxDataFile.close()
+    matrixData = []
+
+    if (allLines[0][0]=='#'):
+        print(allLines[0])
+        del allLines[0]
+    A_list = []
+    C_list = []
+    D_list = []
+    E_list = []
+    F_list = []
+    G_list = []
+    H_list = []
+    I_list = []
+    K_list = []
+    L_list = []
+    M_list = []
+    N_list = []
+    P_list = []
+    Q_list = []
+    R_list = []
+    S_list = []
+    T_list = []
+    V_list = []
+    W_list = []
+    Y_list = []
+    chunkSize = 21
+    seqLength = int(len(allLines)/chunkSize)
+    for i in range (0, seqLength):
+
+        #Append the data to corresponding line 
+        #Please note that the foldx output is in a 
+        #diffent order than the alphabetical single 
+        #letter amino acids order. 
+
+        G_list.append(float(allLines[i*chunkSize+1].split()[1]))
+        A_list.append(float(allLines[i*chunkSize+2].split()[1]))
+        L_list.append(float(allLines[i*chunkSize+3].split()[1]))
+        V_list.append(float(allLines[i*chunkSize+4].split()[1]))
+        I_list.append(float(allLines[i*chunkSize+5].split()[1]))
+        P_list.append(float(allLines[i*chunkSize+6].split()[1]))
+        R_list.append(float(allLines[i*chunkSize+7].split()[1]))
+        T_list.append(float(allLines[i*chunkSize+8].split()[1]))
+        S_list.append(float(allLines[i*chunkSize+9].split()[1]))
+        C_list.append(float(allLines[i*chunkSize+10].split()[1]))
+        M_list.append(float(allLines[i*chunkSize+11].split()[1]))
+        K_list.append(float(allLines[i*chunkSize+12].split()[1]))
+        E_list.append(float(allLines[i*chunkSize+13].split()[1]))
+        Q_list.append(float(allLines[i*chunkSize+14].split()[1]))
+        D_list.append(float(allLines[i*chunkSize+15].split()[1]))
+        N_list.append(float(allLines[i*chunkSize+16].split()[1]))
+        W_list.append(float(allLines[i*chunkSize+17].split()[1]))
+        Y_list.append(float(allLines[i*chunkSize+18].split()[1]))
+        F_list.append(float(allLines[i*chunkSize+19].split()[1]))
+        H_list.append(float(allLines[i*chunkSize+20].split()[1]))
+        
+    matrixData.append(A_list)
+    matrixData.append(C_list)
+    matrixData.append(D_list)
+    matrixData.append(E_list)
+    matrixData.append(F_list)
+    matrixData.append(G_list)
+    matrixData.append(H_list)
+    matrixData.append(I_list)
+    matrixData.append(K_list)
+    matrixData.append(L_list)
+    matrixData.append(M_list)
+    matrixData.append(N_list)
+    matrixData.append(P_list)
+    matrixData.append(Q_list)
+    matrixData.append(R_list)
+    matrixData.append(S_list)
+    matrixData.append(T_list)
+    matrixData.append(V_list)
+    matrixData.append(W_list)
+    matrixData.append(Y_list)
+    
+    mutationsData = np.array(matrixData)
+    if(colorCorrect):
+        mutationsData[mutationsData > colorThreshhold] = colorThreshhold
+    # mutatedTransposed = mutationsData.T
+    # return mutatedTransposed
+    print(mutationsData[0])
+    return mutationsData
+
 
 def getGEMMEAverages(gemmeData):
     """
@@ -246,13 +373,14 @@ def plotGEMME2DvsOther(gemme2DData, other2DData, \
 
 if (__name__ == '__main__'):
 
-    parser = argparse.ArgumentParser(description='GEMMEMORE: A Python package to modify and annotate GEMME results')
+    parser = argparse.ArgumentParser(description=\
+        'GEMMEMORE: A Python package to modify and annotate GEMME results')
     parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
 
     parser.add_argument('-d', '--datatype', dest='datatype', type=str, \
-        help='gemme, rhapsody or evmutation', \
+        help='gemme, rhapsody, foldx or evmutation', \
         required=False, default='gemme')
 
     parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
@@ -262,28 +390,44 @@ if (__name__ == '__main__'):
     parser.add_argument('--offset', dest='offset', type=int, \
         help='An integer value to offset the xlabels for incomplete sequences',
         required=False, default=0)
+    parser.add_argument('--colormap', dest='colormap', type=str, \
+        help='A colormap as defined in matplotlib',
+        required=False, default='coolwarm_r')    
     parser.add_argument('--field', dest='field', type=int, \
         help='An integer value starting from 0 for reading the rhapsody output',
         required=False, default=10)
-   
+    
+    parser.add_argument('-b', '--beginning', dest='beginning', type=int, \
+        help='An integer to indicate the first residue index.',
+        required=False, default=1)
+
+    parser.add_argument('-e', '--end', dest='end', type=int, \
+        help='An integer to indicate the final residue index.',
+        required=False, default=None)
+
     args = parser.parse_args()
     if args.inputfile == None:
         print('Usage: python gemmemore.py [-h] [-i INPUTFILE] [-d GEMME]')
         print('\nError: missing arguments: Please provide --inputfile and/or --datatype')
-        sys.exit(1)
+        sys.exit(-1)
 
     if (args.datatype.lower()=='gemme'):
         gemmeData = parseGEMMEoutput(args.inputfile)
-        plotGEMMEmatrix(gemmeData, args.outputfile, colorMap='coolwarm_r', \
-            offSet=args.offset, pixelType='square')
+        plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
+            colorMap=args.colormap, offSet=args.offset, pixelType='square')
 
-    elif (args.datatype.lower()=='rhapsody' or 'rapsody'):
+    elif (args.datatype.lower()==('rhapsody' or 'rapsody')):
         rhapsodyData = parseRHAPSODYoutput(args.inputfile, field=args.field)
-        plotGEMMEmatrix(rhapsodyData, args.outputfile, colorMap='coolwarm', \
-            offSet=args.offset, pixelType='square')
+        plotGEMMEmatrix(rhapsodyData, args.outputfile, args.beginning, args.end,\
+            colorMap='coolwarm', offSet=args.offset, pixelType='square')
+        
+    elif (args.datatype.lower()=='foldx'):
+        foldxData = parseFOLDXoutput(args.inputfile, colorThreshhold=7.5, colorCorrect=True)
+        plotGEMMEmatrix(foldxData, args.outputfile, args.beginning, args.end,\
+            colorMap='coolwarm', offSet=args.offset, pixelType='square')
     else:
         print("\nError: Unknown data type!")
-        print("         Data types can only be gemme or rhapsody!")
+        print("         Data types can only be gemme, rhapsody or foldx!")
     # gemmeAverages = getGEMMEAverages(gemmeData.T)
     
     # #Read PRS data
