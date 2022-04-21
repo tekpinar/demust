@@ -7,18 +7,21 @@ import matplotlib.pylab as plt
 
 alphabeticalAminoAcidsList = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
                               'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
-def parseGEMMEoutput(inputFile):
+def parseGEMMEoutput(inputFile, verbose):
     """
         Parse normalized (I don't know how?!) GEMME output files: 
         Independent, Epistatic and Combined
         Return: Data File as a Numpy array, where each col contains 
         deleteriousness score for an amino acid.
+        verbose is a boolean value
     """
     gemmeDataFile =open(inputFile, 'r')
     allLines = gemmeDataFile.readlines()
     gemmeDataFile.close()
+
     headerLine = allLines[0]
-    print(headerLine)
+    if(verbose):
+        print(headerLine)
     matrixData = []
     aaColumn = []
     for line in allLines[1:]:
@@ -79,7 +82,7 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     
     print(len(scanningMatrix[0]))
     subMatrix = scanningMatrix[:, (beg-1):end]
-    print(subMatrix)
+    #print(subMatrix)
 
     ##########################################################################
     # Set plotting parameters
@@ -306,7 +309,7 @@ def parseFOLDXoutput(inputFile, colorThreshhold=10.0, colorCorrect=True):
         mutationsData[mutationsData > colorThreshhold] = colorThreshhold
     # mutatedTransposed = mutationsData.T
     # return mutatedTransposed
-    print(mutationsData[0])
+    # print(mutationsData[0])
     return mutationsData
 
 
@@ -371,6 +374,50 @@ def plotGEMME2DvsOther(gemme2DData, other2DData, \
         plt.savefig(figName)
     plt.show()
 
+def rankNormalization(scanningMatrix, printDetails=False):
+    """
+        This function normalizes mutations for each column (namely,
+        over all variants at a certain position) and gives them a 
+        score between 0 and 1. Obviously, 0 means low impact and 
+        1 means the highest impact of the mutation.  
+
+
+    Parameters
+    ----------
+    scanningMatrix: numpy array of arrays
+        Data matrix to rank normalize
+    printDetails: a boolean value
+        If True, it will print details for debugging (Default: False)
+    Returns
+    -------
+    rankNormalizedData: numpy array of arrays
+        Rank normalized data matrix
+    """
+
+    rankNormalizedData = []
+    for col in range(len(scanningMatrix[0])):
+
+        X_min = (scanningMatrix.T[col].min())
+        X_max = (scanningMatrix.T[col].max())
+
+        temp = []
+        if(X_min != X_max):
+            for x in scanningMatrix.T[col]:
+                y = (x - X_min)/(X_max-X_min)
+                temp.append(y)
+        else:
+            for x in scanningMatrix.T[col]:
+                temp.append(0.0)
+
+        
+        if(printDetails):
+            print(scanningMatrix.T[col])
+            print(temp)
+
+        rankNormalizedData.append(temp)
+
+    return np.array(rankNormalizedData).T
+
 if (__name__ == '__main__'):
 
     parser = argparse.ArgumentParser(description=\
@@ -404,7 +451,9 @@ if (__name__ == '__main__'):
     parser.add_argument('-e', '--end', dest='end', type=int, \
         help='An integer to indicate the final residue index.',
         required=False, default=None)
-
+    parser.add_argument('--ranknorm', dest='ranknorm', type=bool, \
+        help='An True or False value to apply rank normalization to data matrix',
+        required=False, default=False)
     args = parser.parse_args()
     if args.inputfile == None:
         print('Usage: python gemmemore.py [-h] [-i INPUTFILE] [-d GEMME]')
@@ -412,9 +461,15 @@ if (__name__ == '__main__'):
         sys.exit(-1)
 
     if (args.datatype.lower()=='gemme'):
-        gemmeData = parseGEMMEoutput(args.inputfile)
-        plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
-            colorMap=args.colormap, offSet=args.offset, pixelType='square')
+        gemmeData = parseGEMMEoutput(args.inputfile, verbose=False)
+        
+        if(args.ranknorm):
+            gemmeData = rankNormalization(gemmeData)
+            plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
+                colorMap=args.colormap, offSet=args.offset, pixelType='square')
+        else:
+            plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
+                colorMap=args.colormap, offSet=args.offset, pixelType='square')
 
     elif (args.datatype.lower()==('rhapsody' or 'rapsody')):
         rhapsodyData = parseRHAPSODYoutput(args.inputfile, field=args.field)
