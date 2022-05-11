@@ -13,6 +13,8 @@ def mapsApp(args):
         print('\nError: missing arguments: Please provide --inputfile and/or --datatype')
         sys.exit(-1)
 
+    print("\nRunning 'demust maps' app...\n")
+        
     if (args.datatype.lower()=='gemme'):
         gemmeData = parseGEMMEoutput(args.inputfile, verbose=False)
         

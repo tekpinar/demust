@@ -50,8 +50,8 @@ def plotsApp(args):
         print('\nError: missing arguments: Please provide --inputfile and/or --datatype')
         sys.exit(-1)
 
-    
-    gemmeData = demust.parseGEMMEoutput(args.inputfile, verbose=False)
+    print("\nRunning 'demust plots' app...\n")    
+    gemmeData = parseGEMMEoutput(args.inputfile, verbose=False)
     if((args.type.lower()=='min') or (args.type.lower()=='max')):
         getMinMaxData(gemmeData, args.type, outfile=args.outputfile, printDetails=False)
 

@@ -3,7 +3,7 @@ import argparse
 from demust import __version__ as cp_vers
 from demust.scripts.maps import mapsApp
 from demust.scripts.plots import plotsApp
-#from demust.scripts.compare import compareApp
+from demust.scripts.compare import compareApp
 
 #TODO:
 
@@ -46,6 +46,7 @@ def main():
     main_parser = argparse.ArgumentParser()
     subparsers = main_parser.add_subparsers(dest='command')
 
+    #maps script argument parsing
     maps_parser  = subparsers.add_parser('maps')
 
     maps_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
@@ -84,6 +85,7 @@ def main():
         help='An True or False value to apply rank normalization to data matrix',
         required=False, default=False)
 
+    #plots script argument parsing
     plots_parser = subparsers.add_parser('plots')
     plots_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
         help='One of the output files of gemme, rhapsody or evmutation', \
@@ -98,17 +100,38 @@ def main():
         help='Name of the output file.', \
         required=False, default='output.txt')
 
-    
+
+    #compare script argument parsing
+    compare_parser = subparsers.add_parser('compare')
+    compare_parser.add_argument('-i', '--inputfile1', dest='inputfile1', type=str, \
+        help='One of the output files of gemme, rhapsody or evmutation', \
+        required=True, default=None)
+    compare_parser.add_argument('--itype', dest='itype', type=str, \
+        help='gemme, rhapsody, foldx or evmutation. Default is gemme.', \
+        required=False, default='gemme')
+    compare_parser.add_argument('-j', '--inputfile2', dest='inputfile2', type=str, \
+        help='One of the output files of gemme, rhapsody or evmutation', \
+        required=True, default=None)
+    compare_parser.add_argument('--jtype', dest='jtype', type=str, \
+        help='gemme, rhapsody, foldx or evmutation. Default is gemme.', \
+        required=False, default='gemme')
+    compare_parser.add_argument('-m', '--metric', dest='metric', type=str, \
+        help='Comparison metric.\n It can be spearman or pearson. Default is spearman', \
+        required=False, default="spearman")
+    compare_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
+        help='Name of the output file. Default is output.txt', \
+        required=False, default='output.txt')
+
     args = main_parser.parse_args()
 
     if args.command == "maps":
         mapsApp(args)
     elif args.command == "plots":
         plotsApp(args)
-#    elif setup.py == "compare":
-        #     compareApp()
-    # elif sys.argv[1] == "-h" or sys.argv[1] == "--help":
-    #     usage_main()
+    elif args.command == "compare":
+       compareApp(args)
+    elif args.command == "-h" or args.command == "--help":
+        usage_main()
     else:
         usage_main()
         sys.exit(-1)
