@@ -44,24 +44,7 @@ def getMinMaxData(scanningMatrix, type, outfile, printDetails=False):
     FILE.close()
 
 
-#if (__name__ == '__main__'):
 def plotsApp(args):
-#    plots_parser = argparse.ArgumentParser(description=\
-#        'DEMUST: A Python package to modify and annotate GEMME results')
-    # plots_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
-    #     help='One of the output files of gemme, rhapsody or evmutation', \
-    #     required=True, default=None)
-    # plots_parser.add_argument('-d', '--datatype', dest='datatype', type=str, \
-    #     help='gemme, rhapsody, foldx or evmutation', \
-    #     required=False, default='gemme')
-    # plots_parser.add_argument('-t', '--type', dest='type', type=str, \
-    #     help='Type of the 2D data that you want to extract. \n It can be min or max.', \
-    #     required=False, default=False)
-    # plots_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
-    #     help='Name of the output file.', \
-    #     required=False, default='output.txt')
-
-    # args = plots_parser.parse_args()
     if args.inputfile == None:
         print('Usage: python demust.py [-h] [-i INPUTFILE] [-d GEMME]')
         print('\nError: missing arguments: Please provide --inputfile and/or --datatype')

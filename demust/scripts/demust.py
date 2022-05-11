@@ -20,20 +20,22 @@ Demust contains three apps:
  - compare
 You can get more information about each individual app as follows:
 demust maps -h
+demust plots -h
+demust compare -h
 """)
 
 
 def main():
 
     print("""
-|-----------------------------------demust----------------------------------------------------------|
+|------------------------------------------demust---------------------------------------------------|
                                                                             
- demust       : A Python toolkit to visualize and analyze deep mutational scanning data of proteins.                                
+ demust       :  A Python toolkit to visualize and analyze deep mutational scanning data of proteins.                                
                                                                              
- Copyright    : (C) Mustafa Tekpinar, 2022                         
- Address      : UMR 7238 CNRS - LCQB, Sorbonne Université, 75005 Paris, France                                
- Email        : tekpinar@buffalo.edu                          
- Licence      : GNU LGPL V3                               
+ Copyright   (C) Mustafa Tekpinar, 2022                         
+ Address      :  UMR 7238 CNRS - LCQB, Sorbonne Université, 75005 Paris, France                                
+ Email        :  tekpinar@buffalo.edu                          
+ Licence      :  GNU LGPL V3                               
                                                                              
  Documentation:                                           
  Citation     : ....................................................................................|      
@@ -103,7 +105,7 @@ def main():
         mapsApp(args)
     elif args.command == "plots":
         plotsApp(args)
-        # elif sys.argv[1] == "compare":
+#    elif setup.py == "compare":
         #     compareApp()
     # elif sys.argv[1] == "-h" or sys.argv[1] == "--help":
     #     usage_main()
