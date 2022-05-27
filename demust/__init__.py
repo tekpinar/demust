@@ -7,6 +7,6 @@ Purpose     : A Python toolkit to visualize and analyze deep mutational
               scanning data of proteins.
 """
 
-__all__ = ['maps', 'plots']
+__all__ = ['maps', 'plots', 'compare', 'convert']
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'

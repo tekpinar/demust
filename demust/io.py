@@ -54,6 +54,14 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     outFile: string
         Name of the output png image
     
+    beg: int
+        The first residue to use. It is used to select a subrange 
+        of amino acids.
+    
+    end: int
+        The last residue to use. It is used to select a subrange 
+        of amino acids.
+
     colorMap: matplotlib cmap
         Any colormap existing in matplotlib.
         Default is coolwarm. 
@@ -312,6 +320,100 @@ def parseFOLDXoutput(inputFile, colorThreshhold=10.0, colorCorrect=True):
     # print(mutationsData[0])
     return mutationsData
 
+def writeGEMMEmatrix(scanningMatrix, outFile, beg, end, \
+                    aaOrder = alphabeticalAminoAcidsList, \
+                    residueList = None,
+                    offSet=0):
+    """
+        A function to write deep mutational scanning matrices. 
+
+    The format, even thought weird, is as follows:
+        X1      X2      ...     XN   
+    'A' 0.5     0.1     ...     0.2
+    'C' 0.0     0.9     ...     0.4
+    .
+    .
+    .
+    'Y' 0.0     0.8     ...     0.7
+
+    It can be read as a dataframe with pandas or any other library.
+    X is the unmutated residues and 1,2....N are residues in the protein.
+  
+    Parameters
+    ----------
+    scanningMatrix: numpy array of arrays
+        Data matrix to plot
+
+    outFile: string
+        Name of the output png image
+    
+    # beg: int
+    #     The first residue to use. It is used to select a subrange 
+    #     of amino acids.
+    
+    # end: int
+    #     The last residue to use. It is used to select a subrange 
+    #     of amino acids.
+
+    aaOrder: Python list
+        A list of 20 amino acid characters such as ['A', 'C',...., 'Y'].  
+        Default is alphabetical list.
+
+    residueList: Python list
+        A list of the residues in the protein such as ['X1', 'X2', ..., 'XN']. 
+        X is one-letter amino acid code and N is the total number of residues. 
+        Default is None.
+        If not provided, the program will write them starting from 1 till the end. 
+
+    offSet: int
+        It is used to match the residue IDs in your PDB
+        file with 0 based indices read from scanningMatrix matrix
+
+    Returns
+    -------
+    Nothing
+
+    """
+    debug = 0
+
+    #We subtract 1 from beg bc matrix indices starts from 0
+    if(end == None):
+        end = len(scanningMatrix[0])
+
+    if(debug):
+        print("Beginning: "+str(beg))
+        print("End      : "+str(end))
+    
+        print(len(scanningMatrix[0]))
+
+    # I don't want to write the submatrices for now!
+    # Let's keep it simple for now! 
+    # subMatrix = scanningMatrix[:, (beg-1):end]
+    realResidueList = []
+    if(residueList == None):
+        for i in range(0,len(scanningMatrix[0])):
+            tempString = 'X'+str(i+1)
+            realResidueList.append(tempString)
+    else:
+        realResidueList = residueList
+
+    with open(outFile, 'w') as file:
+        
+        for res in range(len(realResidueList)):
+            #file.write(' ')
+            file.write(realResidueList[res])
+            if(res != (len(realResidueList)-1)):
+                file.write(' ')
+        file.write('\n')
+
+        for i in range(20):
+            file.write(aaOrder[i])
+            file.write(' ')
+            for res in range (len(scanningMatrix[i])):
+                file.write(str(scanningMatrix[alphabeticalAminoAcidsList.index(aaOrder[i])][res]))
+                if(res != (len(realResidueList)-1)):
+                    file.write(' ')
+            file.write('\n')
 
 def getGEMMEAverages(gemmeData):
     """

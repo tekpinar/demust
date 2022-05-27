@@ -4,6 +4,7 @@ from demust import __version__ as cp_vers
 from demust.scripts.maps import mapsApp
 from demust.scripts.plots import plotsApp
 from demust.scripts.compare import compareApp
+from demust.scripts.convert import convertApp
 
 #TODO:
 
@@ -18,29 +19,31 @@ Demust contains three apps:
  - maps
  - plots
  - compare
+ - convert
 You can get more information about each individual app as follows:
 demust maps -h
 demust plots -h
 demust compare -h
+demust convert -h
 """)
 
 
 def main():
 
     print("""
-|------------------------------------------demust---------------------------------------------------|
-                                                                            
- demust       :  A Python toolkit to visualize and analyze deep mutational scanning data of proteins.                                
-                                                                             
- Copyright   (C) Mustafa Tekpinar, 2022                         
- Address      :  UMR 7238 CNRS - LCQB, Sorbonne Université, 75005 Paris, France                                
- Email        :  tekpinar@buffalo.edu                          
- Licence      :  GNU LGPL V3                               
-                                                                             
- Documentation:                                           
- Citation     : ....................................................................................|      
- Version      : {0}                                
-|---------------------------------------------------------------------------------------------------|
+|-------------------------------------------demust----------------------------------------------------|
+|                                                                                                     |
+| demust       :  A Python toolkit to visualize and analyze deep mutational scanning data of proteins.|                                
+|                                                                                                     |
+| Copyright   (C) Mustafa Tekpinar, 2022                                                              |
+| Address      :  UMR 7238 CNRS - LCQB, Sorbonne Université, 75005 Paris, France                      |          
+| Email        :  tekpinar@buffalo.edu                                                                |
+| Licence      :  GNU LGPL V3                                                                         |
+|                                                                                                     |
+| Documentation:                                                                                      |
+| Citation     : .....................................................................................|      
+| Version      : {0}                                                                                |
+|-----------------------------------------------------------------------------------------------------|
 """.format(cp_vers))
 
     main_parser = argparse.ArgumentParser()
@@ -122,6 +125,21 @@ def main():
         help='Name of the output file. Default is output.txt', \
         required=False, default='output.txt')
 
+    #convert script argument parsing
+    convert_parser = subparsers.add_parser('convert')
+    convert_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
+        help='One of the output files of gemme, rhapsody or evmutation', \
+        required=True, default=None)
+    convert_parser.add_argument('--itype', dest='itype', type=str, \
+        help='gemme, rhapsody, foldx or evmutation. Default is gemme.', \
+        required=False, default='foldx')
+    convert_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
+        help='Default is gemme', \
+        required=True, default='output.txt')
+    convert_parser.add_argument('--otype', dest='otype', type=str, \
+        help='gemme or dms (standard format). Default is gemme.', \
+        required=False, default='gemme')
+
     args = main_parser.parse_args()
 
     if args.command == "maps":
@@ -130,6 +148,8 @@ def main():
         plotsApp(args)
     elif args.command == "compare":
        compareApp(args)
+    elif args.command == "convert":
+       convertApp(args)
     elif args.command == "-h" or args.command == "--help":
         usage_main()
     else:

@@ -44,4 +44,4 @@ def compareApp(args):
 
     if(args.metric.lower() == 'spearman'):
         correlation, pvalue = compareMapsSpearman(gemmeData1, gemmeData2)
-        print("\nSpearman comparison of {} and {}: correlation={} - pvalue={}\n".format(args.inputfile1, args.inputfile2, correlation, pvalue))
+        print("\nSpearman comparison of {} and {}: correlation={:.3f} - pvalue={:.4f}\n".format(args.inputfile1, args.inputfile2, correlation, pvalue))
