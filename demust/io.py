@@ -42,7 +42,9 @@ def parseGEMMEoutput(inputFile, verbose):
     return mutationsData
 
 def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
-                    colorMap = 'coolwarm', offSet=0, pixelType='square'):
+                    colorMap = 'coolwarm', \
+                    offSet=0, pixelType='square',
+                    aaOrder="ACDEFGHIKLMNPQRSTVWY"):
     """
         A function to plot deep mutational scanning matrices. 
   
@@ -121,7 +123,7 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     major_labels_x = major_nums_x + 1 + offSet
 
     major_nums_y = np.arange(0, 20, 1, dtype=int)
-    major_labels_y = alphabeticalAminoAcidsList
+    major_labels_y = list(aaOrder)
 
     plt.xticks(major_nums_x, major_labels_x, size=28)
     ax.set_xticks(minor_nums_x, minor=True)
@@ -329,12 +331,12 @@ def writeGEMMEmatrix(scanningMatrix, outFile, beg, end, \
 
     The format, even thought weird, is as follows:
         X1      X2      ...     XN   
-    'A' 0.5     0.1     ...     0.2
-    'C' 0.0     0.9     ...     0.4
+    "A" 0.5     0.1     ...     0.2
+    "C" 0.0     0.9     ...     0.4
     .
     .
     .
-    'Y' 0.0     0.8     ...     0.7
+    "Y" 0.0     0.8     ...     0.7
 
     It can be read as a dataframe with pandas or any other library.
     X is the unmutated residues and 1,2....N are residues in the protein.
@@ -407,7 +409,7 @@ def writeGEMMEmatrix(scanningMatrix, outFile, beg, end, \
         file.write('\n')
 
         for i in range(20):
-            file.write(aaOrder[i])
+            file.write("\""+aaOrder[i]+"\"")
             file.write(' ')
             for res in range (len(scanningMatrix[i])):
                 file.write(str(scanningMatrix[alphabeticalAminoAcidsList.index(aaOrder[i])][res]))

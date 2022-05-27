@@ -88,6 +88,10 @@ def main():
         help='An True or False value to apply rank normalization to data matrix',
         required=False, default=False)
 
+    maps_parser.add_argument('--aaorder', dest='aaorder', type=str, \
+        help='Amino acid order as a single string. Default is alphabetical: \"ACDEFGHIKLMNPQRSTVWY\"', \
+        required=False, default='ACDEFGHIKLMNPQRSTVWY')
+
     #plots script argument parsing
     plots_parser = subparsers.add_parser('plots')
     plots_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
@@ -139,6 +143,9 @@ def main():
     convert_parser.add_argument('--otype', dest='otype', type=str, \
         help='gemme or dms (standard format). Default is gemme.', \
         required=False, default='gemme')
+    convert_parser.add_argument('--aaorder', dest='aaorder', type=str, \
+        help='Amino acid order as a single string. Default is alphabetical: \"ACDEFGHIKLMNPQRSTVWY\"', \
+        required=False, default='ACDEFGHIKLMNPQRSTVWY')
 
     args = main_parser.parse_args()
 

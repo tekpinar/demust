@@ -21,20 +21,24 @@ def mapsApp(args):
         if(args.ranknorm):
             gemmeData = rankNormalization(gemmeData)
             plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
-                colorMap=args.colormap, offSet=args.offset, pixelType='square')
+                colorMap=args.colormap, offSet=args.offset, pixelType='square',\
+                aaOrder=args.aaorder)
         else:
             plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
-                colorMap=args.colormap, offSet=args.offset, pixelType='square')
+                colorMap=args.colormap, offSet=args.offset, pixelType='square',\
+                aaOrder=args.aaorder)
 
     elif (args.datatype.lower()==('rhapsody' or 'rapsody')):
         rhapsodyData = parseRHAPSODYoutput(args.inputfile, field=args.field)
         plotGEMMEmatrix(rhapsodyData, args.outputfile, args.beginning, args.end,\
-            colorMap='coolwarm', offSet=args.offset, pixelType='square')
+            colorMap='coolwarm', offSet=args.offset, pixelType='square',\
+            aaOrder=args.aaorder)
         
     elif (args.datatype.lower()=='foldx'):
         foldxData = parseFOLDXoutput(args.inputfile, colorThreshhold=7.5, colorCorrect=True)
         plotGEMMEmatrix(foldxData, args.outputfile, args.beginning, args.end,\
-            colorMap='coolwarm', offSet=args.offset, pixelType='square')
+            colorMap='coolwarm', offSet=args.offset, pixelType='square',\
+            aaOrder=args.aaorder)
     else:
         print("\nError: Unknown data type!")
         print("         Data types can only be gemme, rhapsody or foldx!")

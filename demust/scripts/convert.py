@@ -13,6 +13,10 @@ def convertApp(args):
         sys.exit(-1)
 
 
+    
+    # An amino acid order list from 
+    # https://www.embopress.org/doi/full/10.15252/msb.20177908
+    aaOrderV2 = 'AVLIMFYWRHKDESTNQGCP'
     ###########
     print("\nRunning 'demust convert' app...\n")
     
@@ -28,9 +32,13 @@ def convertApp(args):
         print("\nError: Unknown itype!")
         print("         Input data types can be gemme, rhapsody or foldx!")
 
+
+    aaOrderList = list(args.aaorder)
+    print("\nWriting the residues in the following order:\n")
+    print(aaOrderList)
     if (args.otype.lower()=='gemme'):
         writeGEMMEmatrix(scanningMatrix, args.outputfile, beg=0, end=None, \
-                        aaOrder = alphabeticalAminoAcidsList, \
+                        aaOrder = aaOrderList, \
                         residueList = None,
                         offSet=0)
 
