@@ -61,7 +61,7 @@ def main():
         required=False, default='gemme')
 
     maps_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
-        help='Name of the output png file', \
+        help='Name of the output file without file extension. Default extension is png.', \
         required=False, default='output.png')
 
     maps_parser.add_argument('--offset', dest='offset', type=int, \
@@ -70,7 +70,11 @@ def main():
 
     maps_parser.add_argument('--colormap', dest='colormap', type=str, \
         help='A colormap as defined in matplotlib',
-        required=False, default='coolwarm_r')    
+        required=False, default='coolwarm_r')
+
+    maps_parser.add_argument('--paginate', dest='paginate', type=str, \
+        help='A true or false value',
+        required=False, default='false')    
 
     maps_parser.add_argument('--field', dest='field', type=int, \
         help='An integer value starting from 0 for reading the rhapsody output',
@@ -85,7 +89,7 @@ def main():
         required=False, default=None)
 
     maps_parser.add_argument('--ranknorm', dest='ranknorm', type=bool, \
-        help='An True or False value to apply rank normalization to data matrix',
+        help='A True or False value to apply rank normalization to data matrix',
         required=False, default=False)
 
     maps_parser.add_argument('--aaorder', dest='aaorder', type=str, \

@@ -54,7 +54,8 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
         Data matrix to plot
 
     outFile: string
-        Name of the output png image
+        Name of the output image without file extension.
+        Default file extension (png) is added by the program
     
     beg: int
         The first residue to use. It is used to select a subrange 
@@ -104,21 +105,21 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
 
-    if (nres_shown >=200):
+    if (nres_shown >100):
         majorTics = 50
     else:
-        majorTics = 25
+        majorTics = 20
 
 
     major_nums_x = np.arange(majorTics, len(subMatrix[0]), majorTics, dtype=int)
-    major_nums_x = major_nums_x -1
+    #major_nums_x = major_nums_x -1
     major_nums_x = np.insert(major_nums_x, 0, 0)
-    # print(major_nums_x)
+    #print(major_nums_x)
 
     minor_nums_x = np.arange(10, len(subMatrix[0]), 10, dtype=int)
-    minor_nums_x = minor_nums_x - 1
+    #minor_nums_x = minor_nums_x - 1
     minor_nums_x = np.insert(minor_nums_x, 0, 0)
-    # print(minor_nums_x)
+    #print(minor_nums_x)
 
     major_labels_x = major_nums_x + 1 + offSet
 
@@ -132,6 +133,7 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     ax.set_yticklabels(major_labels_y, ha='left')
     ax.tick_params(axis='y', which='major', pad=30)
 
+    
     #############################################################################
     if(pixelType=='square'):
         #For plotting square pixels
@@ -142,11 +144,14 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     else:
         print("\nERROR: Unknown pixelType specified!\n")
         sys.exit(-1)
+    
+    #To make the colors consistent if there are submatrices.
+    plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
 
     #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     plt.tight_layout()
-    plt.savefig(outFile)
-    plt.show()
+    plt.savefig(outFile+".png")
+    #plt.show()
     
 
     #plt.imsave('output.png', subMatrix)
