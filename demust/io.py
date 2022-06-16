@@ -27,10 +27,9 @@ def parseGEMMEoutput(inputFile, verbose):
     for line in allLines[1:]:
         tempList = []
         data = line.split()
-        for item in data:
-            if item[0] == "\"":
-                aaColumn.append(item)
-            elif (item == 'NA'):
+        aaColumn.append(data[0])
+        for item in data[1:]:
+            if (item == 'NA'):
                 tempList.append(0.0000000)
             else:
                 tempList.append(float(item))
