@@ -62,7 +62,7 @@ def main():
 
     maps_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
         help='Name of the output file without file extension. Default extension is png.', \
-        required=False, default='output.png')
+        required=False, default='output')
 
     maps_parser.add_argument('--offset', dest='offset', type=int, \
         help='An integer value to offset the xlabels for incomplete sequences',
