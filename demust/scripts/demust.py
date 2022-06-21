@@ -5,6 +5,7 @@ from demust.scripts.maps import mapsApp
 from demust.scripts.plots import plotsApp
 from demust.scripts.compare import compareApp
 from demust.scripts.convert import convertApp
+from demust.scripts.removegaps import removeGapsApp
 
 #TODO:
 
@@ -15,16 +16,18 @@ def usage_main():
     print("""
 Example usage:
 demust -h
-Demust contains three apps:
+Demust contains five apps:
  - maps
  - plots
  - compare
  - convert
+ - removegaps
 You can get more information about each individual app as follows:
 demust maps -h
 demust plots -h
 demust compare -h
 demust convert -h
+demust removegaps -h
 """)
 
 
@@ -151,6 +154,17 @@ def main():
         help='Amino acid order as a single string. Default is alphabetical: \"ACDEFGHIKLMNPQRSTVWY\"', \
         required=False, default='ACDEFGHIKLMNPQRSTVWY')
 
+    #removegaps script argument parser
+    removegaps_parser = subparsers.add_parser('removegaps')
+
+    removegaps_parser.add_argument('-i', '--inputgappedmsa', dest='inputgappedmsa', type=str, \
+        help="Name of the input gapped Multiple Sequence Alignment file in fasta format.",
+        required=True, default=None)
+
+    removegaps_parser.add_argument('-o', '--outputungappedmsa', dest='outputungappedmsa', type=str, \
+        help="Name of the output gapped Multiple Sequence Alignment file in fasta format. Default is outputungappedmsa.fasta",
+        required=False, default="outputungappedmsa.fasta")
+
     args = main_parser.parse_args()
 
     if args.command == "maps":
@@ -161,6 +175,8 @@ def main():
        compareApp(args)
     elif args.command == "convert":
        convertApp(args)
+    elif args.command == "removegaps":
+       removeGapsApp(args)
     elif args.command == "-h" or args.command == "--help":
         usage_main()
     else:
