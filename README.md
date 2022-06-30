@@ -5,7 +5,13 @@
 demust contains five main scripts: plots, maps, convert, compare and removegaps. 
 
 ## Installation
-Download the repository and go to the demust folder. Then, run the following command:
+Download the repository:
+```bash
+git clone https://github.com/tekpinar/demust.git
+```
+
+
+Go to the demust folder. Then, run the following command:
 
 ```bash
 pip install -e .
