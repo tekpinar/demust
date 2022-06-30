@@ -10,6 +10,8 @@ def removeGaps(inputMSAfile, outputMSAfile):
     """
         Remove gaps in the query sequence!
 
+        Query sequence is assumed to be the top sequence. 
+
     Parameters
     ----------
     inputMSAfile: str
@@ -54,17 +56,17 @@ def removeGaps(inputMSAfile, outputMSAfile):
         count = SeqIO.write(alignment, handle, "fasta")
 
 def removeGapsApp(args):
-    removegaps_parser = argparse.ArgumentParser()
+    # removegaps_parser = argparse.ArgumentParser()
 
-    removegaps_parser.add_argument('-i', '--inputgappedmsa', dest='inputgappedmsa', type=str, \
-        help="Name of the input gapped Multiple Sequence Alignment file in fasta format.",
-        required=True, default=None)
+    # removegaps_parser.add_argument('-i', '--inputgappedmsa', dest='inputgappedmsa', type=str, \
+    #     help="Name of the input gapped Multiple Sequence Alignment file in fasta format.",
+    #     required=True, default=None)
 
-    removegaps_parser.add_argument('-o', '--outputungappedmsa', dest='outputungappedmsa', type=str, \
-        help="Name of the output gapped Multiple Sequence Alignment file in fasta format. Default is outputungappedmsa.fasta",
-        required=False, default="outputungappedmsa.fasta")
+    # removegaps_parser.add_argument('-o', '--outputungappedmsa', dest='outputungappedmsa', type=str, \
+    #     help="Name of the output gapped Multiple Sequence Alignment file in fasta format. Default is outputungappedmsa.fasta",
+    #     required=False, default="outputungappedmsa.fasta")
 
-    args = removegaps_parser.parse_args() 
+    # args = removegaps_parser.parse_args() 
     # Check flag arguments
     if args.inputgappedmsa is None:
     	print("ERROR: The program requires an input MSA in fasta format")
