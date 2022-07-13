@@ -5,6 +5,7 @@ import argparse
 import numpy as np
 import matplotlib.pylab as plt
 
+
 alphabeticalAminoAcidsList = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
                               'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
 def parseGEMMEoutput(inputFile, verbose):
@@ -43,7 +44,9 @@ def parseGEMMEoutput(inputFile, verbose):
 def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
                     colorMap = 'coolwarm', \
                     offSet=0, pixelType='square',
-                    aaOrder="ACDEFGHIKLMNPQRSTVWY"):
+                    aaOrder="ACDEFGHIKLMNPQRSTVWY", \
+                    interactive=True,
+                    isColorBarOn=False):
     """
         A function to plot deep mutational scanning matrices. 
   
@@ -58,7 +61,7 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     
     beg: int
         The first residue to use. It is used to select a subrange 
-        of amino acids.
+        of amino acids. It starts from 1.
     
     end: int
         The last residue to use. It is used to select a subrange 
@@ -76,6 +79,13 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
         It can only have 'square' or 'rectangle' values.
         It is a matter of taste but I added it as an option.
         Default is 'square'
+
+    interactive: bool
+        If True, it will plot the map interactively. 
+
+    isColorBarOn: bool
+        If True, it will show a colorbar to show the numerical scale of
+        the colors. Default is False. 
 
     Returns
     -------
@@ -147,10 +157,16 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     #To make the colors consistent if there are submatrices.
     plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
 
-    #plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+    if(isColorBarOn):
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="1%", pad=0.2)
+        plt.colorbar(cax=cax)
+
     plt.tight_layout()
     plt.savefig(outFile+".png")
-    #plt.show()
+    if(interactive):
+        plt.show()
     
 
     #plt.imsave('output.png', subMatrix)

@@ -29,6 +29,8 @@ def removeGaps(inputMSAfile, outputMSAfile):
     print(alignment[0].seq)
     numSeqInMSA = len(alignment)
 
+    print("Number of sequences read: "+str(numSeqInMSA))
+
     df = pd.DataFrame()
     for i in range (numSeqInMSA):
         df[alignment[i].id] = list(alignment[i].seq)
@@ -49,6 +51,7 @@ def removeGaps(inputMSAfile, outputMSAfile):
     transpose_list = transpose.tolist()
 
     for i in range (numSeqInMSA):
+        #print(i)
         alignment[i].seq = Seq("".join(transpose_list[i]))
 
     print(alignment[1].seq)
