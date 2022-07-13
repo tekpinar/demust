@@ -45,7 +45,8 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
                     colorMap = 'coolwarm', \
                     offSet=0, pixelType='square',
                     aaOrder="ACDEFGHIKLMNPQRSTVWY", \
-                    interactive=True,
+                    sequence=None,\
+                    interactive=True,\
                     isColorBarOn=False):
     """
         A function to plot deep mutational scanning matrices. 
@@ -79,6 +80,9 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
         It can only have 'square' or 'rectangle' values.
         It is a matter of taste but I added it as an option.
         Default is 'square'
+
+    sequence: string
+        A string of one letter amino acid codes from N terminal to C terminal. 
 
     interactive: bool
         If True, it will plot the map interactively. 
@@ -114,7 +118,7 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
 
-    if (nres_shown >100):
+    if (nres_shown >150):
         majorTics = 50
     else:
         majorTics = 20
@@ -146,10 +150,10 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     #############################################################################
     if(pixelType=='square'):
         #For plotting square pixels
-        plt.imshow(subMatrix, cmap=colorMap)
+        img = plt.imshow(subMatrix, cmap=colorMap)
     elif(pixelType=='rectangle'):
         #For plotting rectangular pixels
-        plt.imshow(subMatrix, cmap=colorMap, aspect=3.0)
+        img = plt.imshow(subMatrix, cmap=colorMap, aspect=3.0)
     else:
         print("\nERROR: Unknown pixelType specified!\n")
         sys.exit(-1)
@@ -157,11 +161,19 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     #To make the colors consistent if there are submatrices.
     plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
 
+    if(sequence!=None):
+        #Convert aaOrder to a list.
+        aaOrderList = list(aaOrder)
+        for i in range (len(subMatrix[0])):
+            j = beg-1+i
+            # print(i, aaOrderList.index(sequence[i]))
+            plt.scatter(i, aaOrderList.index(sequence[j]), s=5, c='black', marker='o')
+    
     if(isColorBarOn):
         from mpl_toolkits.axes_grid1 import make_axes_locatable
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="1%", pad=0.2)
-        plt.colorbar(cax=cax)
+        plt.colorbar(img, cax=cax)
 
     plt.tight_layout()
     plt.savefig(outFile+".png")
