@@ -36,8 +36,8 @@ def main():
     print("""
 |-------------------------------------------demust----------------------------------------------------|
 |                                                                                                     |
-| demust       :  A Python toolkit to visualize and analyze deep mutational scanning data of proteins.|                                
-|                                                                                                     |
+| demust       :  A Python toolkit to modify, visualize and analyze deep mutational scanning (DMS)    |                                
+|                 data of proteins.                                                                   |
 | Copyright   (C) Mustafa Tekpinar, 2022                                                              |
 | Address      :  UMR 7238 CNRS - LCQB, Sorbonne Université, 75005 Paris, France                      |          
 | Email        :  tekpinar@buffalo.edu                                                                |
@@ -49,7 +49,8 @@ def main():
 |-----------------------------------------------------------------------------------------------------|
 """.format(cp_vers))
 
-    main_parser = argparse.ArgumentParser()
+    main_parser = argparse.ArgumentParser(description=\
+        "A Python toolkit to modify, visualize and analyze deep mutational scanning (DMS) data of proteins.")
     subparsers = main_parser.add_subparsers(dest='command')
 
     #maps script argument parsing

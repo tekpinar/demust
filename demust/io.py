@@ -31,7 +31,7 @@ def parseGEMMEoutput(inputFile, verbose):
         aaColumn.append(data[0])
         for item in data[1:]:
             if (item == 'NA'):
-                tempList.append(0.0000000)
+                tempList.append(2.0000000)
             else:
                 tempList.append(float(item))
         matrixData.append(tempList)
