@@ -4,6 +4,7 @@ import sys
 import argparse
 import numpy as np
 import matplotlib.pylab as plt
+from Bio import SeqIO
 
 
 alphabeticalAminoAcidsList = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
@@ -162,12 +163,13 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
 
     if(sequence!=None):
+        mySeqFile = SeqIO.read(sequence, 'fasta')
         #Convert aaOrder to a list.
         aaOrderList = list(aaOrder)
         for i in range (len(subMatrix[0])):
             j = beg-1+i
             # print(i, aaOrderList.index(sequence[i]))
-            plt.scatter(i, aaOrderList.index(sequence[j]), s=5, c='black', marker='o')
+            plt.scatter(i, aaOrderList.index(mySeqFile.seq[j]), s=5, c='black', marker='o')
     
     if(isColorBarOn):
         from mpl_toolkits.axes_grid1 import make_axes_locatable
