@@ -5,6 +5,7 @@ import argparse
 import numpy as np
 import matplotlib.pylab as plt
 from Bio import SeqIO
+import pandas as pd
 
 
 alphabeticalAminoAcidsList = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
@@ -83,7 +84,7 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
         Default is 'square'
 
     sequence: string
-        A string of one letter amino acid codes from N terminal to C terminal. 
+        A fasta file of one letter amino acid codes from N terminal to C terminal. 
 
     interactive: bool
         If True, it will plot the map interactively. 
@@ -228,7 +229,7 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
         Default is 'square'
 
     sequence: string
-        A string of one letter amino acid codes from N terminal to C terminal. 
+        A fasta file of one letter amino acid codes from N terminal to C terminal. 
 
     interactive: bool
         If True, it will plot the map interactively. 
@@ -310,12 +311,13 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
     plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
 
     if(sequence!=None):
+        mySeqFile = SeqIO.read(sequence, 'fasta')
         #Convert aaOrder to a list.
         aaOrderList = list(aaOrder)
         for i in range (len(subMatrix[0])):
             j = beg-1+i
             # print(i, aaOrderList.index(sequence[i]))
-            plt.scatter(i, aaOrderList.index(sequence[j]), s=5, c='black', marker='o')
+            plt.scatter(i, aaOrderList.index(mySeqFile.seq[j]), s=5, c='black', marker='o')
     
     if(isColorBarOn):
         from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -701,4 +703,82 @@ def rankNormalization(scanningMatrix, printDetails=False):
         rankNormalizedData.append(temp)
 
     return np.array(rankNormalizedData).T
+
+def parseRiesselmanData(inputcsv, experiment='DMS_score', 
+                            outputcsv="convertedMatrix.csv",
+                            debug = False):
+    """
+        Parse Riesselman experimental data files from the
+        https://www.nature.com/articles/s41592-018-0138-4
+
+    Parameters
+    ----------
+    inputcsv: string
+        Name of the experimental input data file in csv format
+    
+    experiment: string
+        Name of the experiment such as score, screenscorem, fitness,
+        abundance.  
+
+    outputcsv: string
+        Name of the output data file in csv format.
+
+    debug: bool
+        If True, it will print some extra data to stdout. 
+
+    Returns
+    -------
+    Data as a Numpy array, where each col contains 
+        an experimental parameter for an amino acid mutation.
+        Rows of the matrix are amino acids in alphabetical order. 
+    """
+    
+    df = pd.read_csv(inputcsv, sep=";", decimal=",")
+
+    #Add three new columns.
+    df['wt'] = ""
+    df['mutation']=""
+    df['resid']=""
+
+    if(debug):
+        print (df.columns)
+
+    # Fill the 
+    for index, row in df.iterrows():
+        df['wt'].iloc[index] = row['mutant'][0]
+        df['mutation'].iloc[index] = row['mutant'][-1]
+        df['resid'].iloc[index] = int(row['mutant'][1:-1])
+        #print(index, row['mutant'], row['DMS_score'])
+
+    #Create a new dataframe from only the necessary columns
+    new_df = df[['wt','resid', 'mutation', experiment]].copy()
+    if(debug):
+        print(new_df)
+
+    minResid = (new_df['resid'].min())
+    maxResid = (new_df['resid'].max())
+
+    numCols = maxResid - minResid + 1
+
+    print(numCols)
+
+    # dmsMap  = pd.DataFrame(index=range(numRows), columns=['resid']+alphabeticalAminoAcidsList, dtype=float)
+
+    colsList = [str(x) for x in np.arange(1, numCols+1)] 
+    #dmsMap  = pd.DataFrame(index=range(20), columns=colsList, dtype=float)
+    dmsMap  = pd.DataFrame(index=alphabeticalAminoAcidsList, columns=colsList, dtype=float)
+    
+    #print(dmsMap.columns)
+    #print(['resid']+alphabeticalAminoAcidsList)
+
+    for index, row in new_df.iterrows():
+        # print(index, row)
+        for aa in alphabeticalAminoAcidsList:
+            if(row['mutation'] == aa):
+                dmsMap[str(row['resid']-minResid + 1)].loc[aa] = row[experiment]
+    
+    if(outputcsv != None):
+        dmsMap.to_csv(outputcsv, index=True)
+
+    return dmsMap.to_numpy()
 

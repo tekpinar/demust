@@ -6,6 +6,7 @@ from demust.scripts.plots import plotsApp
 from demust.scripts.compare import compareApp
 from demust.scripts.convert import convertApp
 from demust.scripts.removegaps import removeGapsApp
+from demust.scripts.riesselman import riesselmanApp
 
 #TODO:
 
@@ -170,6 +171,34 @@ def main():
         help="Name of the output gapped Multiple Sequence Alignment file in fasta format. Default is outputungappedmsa.fasta",
         required=False, default="outputungappedmsa.fasta")
 
+    # riesselman script argument parsing
+    riesselman_parser = subparsers.add_parser('riesselman', description=\
+        "This script will parse and plot experimental DMS maps from Riesselman, 2016.")
+
+    riesselman_parser.add_argument('-d', '--dataset', dest='dataset', type=str, \
+        help='Name of the dataset that you want to retrieve.', \
+        required=True, default=None)
+    
+    riesselman_parser.add_argument('-e', '--experiment', dest='experiment', type=str, \
+        help='Experiment type field such as fitness, abundance, screenscore.', \
+        required=True, default="DMS_score")
+
+    riesselman_parser.add_argument('--colormap', dest='colormap', type=str, \
+        help='A colormap as defined in matplotlib',
+        required=False, default='coolwarm_r')
+
+    riesselman_parser.add_argument('-s', '--sequence', dest='sequence', type=str, \
+        help='One of the input sequence file in fasta format', \
+        required=False, default=None)
+
+    riesselman_parser.add_argument('-m', '--metric', dest='metric', type=str, \
+        help='Comparison metric.\n It can be spearman or pearson. Default is spearman', \
+        required=False, default="spearman")
+    
+    riesselman_parser.add_argument('-o', '--output', dest='output', type=str, \
+        help='Name of the output file prefix for the csv and the png file. Default is output', \
+        required=False, default='output')
+
     args = main_parser.parse_args()
 
     if args.command == "maps":
@@ -182,6 +211,8 @@ def main():
        convertApp(args)
     elif args.command == "removegaps":
        removeGapsApp(args)
+    elif args.command == "riesselman":
+       riesselmanApp(args)
     elif args.command == "-h" or args.command == "--help":
         usage_main()
     else:
