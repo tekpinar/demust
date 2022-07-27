@@ -96,6 +96,10 @@ def main():
         help='A True or False value to apply rank normalization to data matrix',
         required=False, default=False)
 
+    maps_parser.add_argument('-s', '--sequence', dest='sequence', type=str, \
+        help='Input sequence file in fasta format', \
+        required=False, default=None)
+
     maps_parser.add_argument('--aaorder', dest='aaorder', type=str, \
         help='Amino acid order as a single string. Default is alphabetical: \"ACDEFGHIKLMNPQRSTVWY\"', \
         required=False, default='ACDEFGHIKLMNPQRSTVWY')

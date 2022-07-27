@@ -184,6 +184,152 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     #plt.imsave('output.png', subMatrix)
     plt.close()
 
+def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
+                    colorMap = 'coolwarm', \
+                    offSet=0, pixelType='square',
+                    aaOrder="ACDEFGHIKLMNPQRSTVWY", \
+                    sequence=None,\
+                    interactive=True,\
+                    isColorBarOn=False):
+    """
+        A function to plot deep mutational scanning data from
+        the Rieselamn dataset. 
+  
+    Parameters
+    ----------
+    scanningMatrix: numpy array of arrays
+        Data matrix to plot
+
+    outFile: string
+        Name of the output image without file extension.
+        Default file extension (png) is added by the program
+    
+    beg: int
+        The first residue to use. It is used to select a subrange 
+        of amino acids. It starts from 1.
+    
+    end: int
+        The last residue to use. It is used to select a subrange 
+        of amino acids.
+
+    colorMap: matplotlib cmap
+        Any colormap existing in matplotlib.
+        Default is coolwarm. 
+
+    offSet: int
+        It is used to match the residue IDs in your PDB
+        file with 0 based indices read from scanningMatrix matrix
+
+    pixelType: string
+        It can only have 'square' or 'rectangle' values.
+        It is a matter of taste but I added it as an option.
+        Default is 'square'
+
+    sequence: string
+        A string of one letter amino acid codes from N terminal to C terminal. 
+
+    interactive: bool
+        If True, it will plot the map interactively. 
+
+    isColorBarOn: bool
+        If True, it will show a colorbar to show the numerical scale of
+        the colors. Default is False. 
+
+    Returns
+    -------
+    Nothing
+
+    """
+
+    scanningMatrix = np.ma.array (scanningMatrix, mask=np.isnan(scanningMatrix))
+
+    #We subtract 1 from beg bc matrix indices starts from 0
+    if(end == None):
+        end = len(scanningMatrix[0])
+
+    print("Beginning: "+str(beg))
+    print("End      : "+str(end))
+    
+    print(len(scanningMatrix[0]))
+    subMatrix = scanningMatrix[:, (beg-1):end]
+    #print(subMatrix)
+
+    ##########################################################################
+    # Set plotting parameters
+    nres_shown = len(subMatrix[0])
+    fig_height=8
+    # figure proportions
+    fig_width = fig_height/2  # inches
+    fig_width *= nres_shown/20
+    
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+
+    if (nres_shown >150):
+        majorTics = 50
+    else:
+        majorTics = 20
+
+
+    major_nums_x = np.arange(majorTics, len(subMatrix[0]), majorTics, dtype=int)
+    #major_nums_x = major_nums_x -1
+    major_nums_x = np.insert(major_nums_x, 0, 0)
+    #print(major_nums_x)
+
+    minor_nums_x = np.arange(10, len(subMatrix[0]), 10, dtype=int)
+    #minor_nums_x = minor_nums_x - 1
+    minor_nums_x = np.insert(minor_nums_x, 0, 0)
+    #print(minor_nums_x)
+
+    major_labels_x = major_nums_x + 1 + offSet
+
+    major_nums_y = np.arange(0, 20, 1, dtype=int)
+    major_labels_y = list(aaOrder)
+
+    plt.xticks(major_nums_x, major_labels_x, size=28)
+    ax.set_xticks(minor_nums_x, minor=True)
+    
+    plt.yticks(major_nums_y, major_labels_y, size=16)
+    ax.set_yticklabels(major_labels_y, ha='left')
+    ax.tick_params(axis='y', which='major', pad=30)
+
+    
+    #############################################################################
+    if(pixelType=='square'):
+        #For plotting square pixels
+        img = plt.imshow(subMatrix, cmap=colorMap)
+    elif(pixelType=='rectangle'):
+        #For plotting rectangular pixels
+        img = plt.imshow(subMatrix, cmap=colorMap, aspect=3.0)
+    else:
+        print("\nERROR: Unknown pixelType specified!\n")
+        sys.exit(-1)
+    
+    #To make the colors consistent if there are submatrices.
+    plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
+
+    if(sequence!=None):
+        #Convert aaOrder to a list.
+        aaOrderList = list(aaOrder)
+        for i in range (len(subMatrix[0])):
+            j = beg-1+i
+            # print(i, aaOrderList.index(sequence[i]))
+            plt.scatter(i, aaOrderList.index(sequence[j]), s=5, c='black', marker='o')
+    
+    if(isColorBarOn):
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="1%", pad=0.2)
+        plt.colorbar(img, cax=cax)
+
+    plt.tight_layout()
+    plt.savefig(outFile+".png")
+    if(interactive):
+        plt.show()
+    
+
+    #plt.imsave('output.png', subMatrix)
+    plt.close()
+
 def parseRHAPSODYoutput(inputFile, field=10):
     """
         Parse RHAPSODY output files

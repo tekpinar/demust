@@ -24,7 +24,7 @@ def mapsApp(args):
             gemmeData = rankNormalization(gemmeData)
             plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
                 colorMap=args.colormap, offSet=args.offset, pixelType='square',\
-                aaOrder=args.aaorder)
+                aaOrder=args.aaorder, sequence=args.sequence)
         else:
             if(args.paginate.lower()=="true"):
                 sequenceLength = (args.end - args.beginning - 1) # -1 is for starting the count from 0. 
@@ -37,17 +37,17 @@ def mapsApp(args):
                         i*rowLength + args.beginning, \
                         (i+1)*rowLength + args.beginning -1,\
                         colorMap=args.colormap, offSet=i*rowLength + args.offset, pixelType='square',\
-                        aaOrder=args.aaorder)
+                        aaOrder=args.aaorder, sequence=args.sequence)
                 if(sequenceLength%rowLength != 0):
                     plotGEMMEmatrix(gemmeData, args.outputfile+"_part_"+str(i+2), \
                         (i+1)*rowLength + args.beginning, \
                         args.end,\
                         colorMap=args.colormap, offSet=(i+1)*rowLength + args.offset, pixelType='square',\
-                        aaOrder=args.aaorder)
+                        aaOrder=args.aaorder, sequence=args.sequence)
             else:
                 plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
                     colorMap=args.colormap, offSet=args.offset, pixelType='square',\
-                    aaOrder=args.aaorder)
+                    aaOrder=args.aaorder, sequence=args.sequence)
 
     elif (args.datatype.lower()==('rhapsody' or 'rapsody')):
         rhapsodyData = parseRHAPSODYoutput(args.inputfile, field=args.field)
@@ -65,17 +65,17 @@ def mapsApp(args):
                     i*rowLength + args.beginning, \
                     (i+1)*rowLength + args.beginning -1,\
                     colorMap=args.colormap, offSet=i*rowLength + args.offset, pixelType='square',\
-                    aaOrder=args.aaorder)
+                    aaOrder=args.aaorder, sequence=args.sequence)
             if(sequenceLength%rowLength != 0):
                 plotGEMMEmatrix(rhapsodyData, args.outputfile+"_part_"+str(i+2), \
                     (i+1)*rowLength + args.beginning, \
                     args.end,\
                     colorMap=args.colormap, offSet=(i+1)*rowLength + args.offset, pixelType='square',\
-                    aaOrder=args.aaorder)
+                    aaOrder=args.aaorder, sequence=args.sequence)
         else:        
             plotGEMMEmatrix(rhapsodyData, args.outputfile, args.beginning, args.end,\
                 colorMap=args.colormap, offSet=args.offset, pixelType='square',\
-                aaOrder=args.aaorder)
+                aaOrder=args.aaorder, sequence=args.sequence)
         
     elif (args.datatype.lower()=='foldx'):
         foldxData = parseFOLDXoutput(args.inputfile, colorThreshhold=7.5, colorCorrect=True)
@@ -93,17 +93,17 @@ def mapsApp(args):
                     i*rowLength + args.beginning, \
                     (i+1)*rowLength + args.beginning -1,\
                     colorMap=args.colormap, offSet=i*rowLength + args.offset, pixelType='square',\
-                    aaOrder=args.aaorder)
+                    aaOrder=args.aaorder, sequence=args.sequence)
             if(sequenceLength%rowLength != 0):
                 plotGEMMEmatrix(foldxData, args.outputfile+"_part_"+str(i+2), \
                     (i+1)*rowLength + args.beginning, \
                     args.end,\
                     colorMap=args.colormap, offSet=(i+1)*rowLength + args.offset, pixelType='square',\
-                    aaOrder=args.aaorder)
+                    aaOrder=args.aaorder, sequence=args.sequence)
         else:        
             plotGEMMEmatrix(foldxData, args.outputfile, args.beginning, args.end,\
                 colorMap=args.colormap, offSet=args.offset, pixelType='square',\
-                aaOrder=args.aaorder)
+                aaOrder=args.aaorder, sequence=args.sequence)
 
     else:
         print("\nError: Unknown data type!")
