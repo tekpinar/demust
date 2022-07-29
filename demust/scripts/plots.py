@@ -1,60 +1,60 @@
 from demust.io import *
 import argparse
+from scipy.stats import rankdata
+import pandas as pd
 
-def getMinMaxData(scanningMatrix, type, outfile, printDetails=False):
-    """
-        This function gets min and max for each column (namely,
-        over all variants at a certain position). 
+# def getMinMaxData(scanningMatrix, type, outfile, printDetails=False):
+#     """
+#         This function gets min and max for each column (namely,
+#         over all variants at a certain position). 
 
-    Parameters
-    ----------
-    scanningMatrix: numpy array of arrays
-        Data matrix to rank normalize
-    type: string
-        type can only be min or max.    
-    outfile: string
-        Prefix for the output file.
-    printDetails: a boolean value
-        If True, it will print details for debugging (Default: False)
-    Returns
-    -------
-    Nothing
-    """
+#     Parameters
+#     ----------
+#     scanningMatrix: numpy array of arrays
+#         Data matrix to rank normalize
+#     type: string
+#         type can only be min or max.    
+#     outfile: string
+#         Prefix for the output file.
+#     printDetails: a boolean value
+#         If True, it will print details for debugging (Default: False)
+#     Returns
+#     -------
+#     Nothing
+#     """
 
-    data = []
-    FILE = open(outfile, "w")
-    if(type.lower()=='max'):
-        for col in range(len(scanningMatrix[0])):
-            X_max = (scanningMatrix.T[col].max())            
-            FILE.write("{}\t{}\n".format(col, X_max))
-            data.append(X_max)
+#     data = []
+#     FILE = open(outfile, "w")
+#     if(type.lower()=='max'):
+#         for col in range(len(scanningMatrix[0])):
+#             X_max = (scanningMatrix.T[col].max())            
+#             FILE.write("{}\t{}\n".format(col, X_max))
+#             data.append(X_max)
             
-            if(printDetails):
-                print(scanningMatrix.T[col])
+#             if(printDetails):
+#                 print(scanningMatrix.T[col])
         
-    elif(type.lower()=='min'):
-        for col in range(len(dataArray)):
-            X_min = (scanningMatrix.T[col].min())
-            FILE.write("{}\t{}\n".format(col, X_min))
-            data.append(X_min)
+#     elif(type.lower()=='min'):
+#         for col in range(len(scanningMatrix[0])):
+#             X_min = (scanningMatrix.T[col].min())
+#             FILE.write("{}\t{}\n".format(col, X_min))
+#             data.append(X_min)
 
-            if(printDetails):
-                print(scanningMatrix.T[col])
-    else:
-        print("ERROR: Unknown type!")
-        print("       Type can only be min or max!")
-        sys.exit(-1)
+#             if(printDetails):
+#                 print(scanningMatrix.T[col])
+#     else:
+#         print("ERROR: Unknown type!")
+#         print("       Type can only be min or max!")
+#         sys.exit(-1)
     
-    FILE.close()
-    return data
+#     FILE.close()
+#     return data
 
-def plotMinMax(dataArray, outFile, beg, end, \
-                colorMap = 'coolwarm', \
+def plot1DHeatMap(dataArray, outFile, beg, end, \
+                colorMap = 'Reds', \
                 offSet=0, pixelType='square',
-                aaOrder="ACDEFGHIKLMNPQRSTVWY", \
                 sequence=None,\
-                interactive=True,\
-                isColorBarOn=False):
+                interactive=True):
     """
         A function to plot deep mutational scanning matrices. 
   
@@ -75,9 +75,9 @@ def plotMinMax(dataArray, outFile, beg, end, \
         The last residue to use. It is used to select a subrange 
         of amino acids.
 
-    colorMap: matplotlib cmap
-        Any colormap existing in matplotlib.
-        Default is coolwarm. 
+    colorMap: matplotlib color
+        Any color existing in matplotlib.
+        Default is red. 
 
     offSet: int
         It is used to match the residue IDs in your PDB
@@ -103,15 +103,17 @@ def plotMinMax(dataArray, outFile, beg, end, \
     Nothing
 
     """
-
+    print(dataArray)
+    print(np.arange(len(dataArray)))
     #We subtract 1 from beg bc matrix indices starts from 0
     if(end == None):
         end = len(dataArray)
 
+
     print("Beginning: "+str(beg))
     print("End      : "+str(end))
     
-    print(len(dataArray))
+    # print(len(dataArray))
     subArray = dataArray[(beg-1):end]
     #print(subArray)
 
@@ -123,7 +125,7 @@ def plotMinMax(dataArray, outFile, beg, end, \
     fig_width = fig_height/2  # inches
     fig_width *= nres_shown/20
     
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height/4))
 
     if (nres_shown >150):
         majorTics = 50
@@ -135,32 +137,31 @@ def plotMinMax(dataArray, outFile, beg, end, \
     #major_nums_x = major_nums_x -1
     major_nums_x = np.insert(major_nums_x, 0, 0)
     #print(major_nums_x)
-
     minor_nums_x = np.arange(10, len(subArray), 10, dtype=int)
     #minor_nums_x = minor_nums_x - 1
     minor_nums_x = np.insert(minor_nums_x, 0, 0)
     #print(minor_nums_x)
-
     major_labels_x = major_nums_x + 1 + offSet
-
-    major_nums_y = np.arange(0, 20, 1, dtype=int)
-    major_labels_y = list(aaOrder)
-
     plt.xticks(major_nums_x, major_labels_x, size=28)
     ax.set_xticks(minor_nums_x, minor=True)
     
+    major_nums_y = np.arange(0, 1, 0.5)
+    # major_labels_y = list(major_nums_y)
+    major_labels_y = [" ", " "]
     plt.yticks(major_nums_y, major_labels_y, size=16)
-    ax.set_yticklabels(major_labels_y, ha='left')
+    # ax.set_yticklabels([str(round(float(label), 2)) for label in major_labels_y], ha='left')
     ax.tick_params(axis='y', which='major', pad=30)
 
     
     #############################################################################
     if(pixelType=='square'):
         #For plotting square pixels
-        img = plt.bar(subArray)
-    #elif(pixelType=='rectangle'):
-        #For plotting rectangular pixels
-        #img = plt.imshow(subArray, cmap=colorMap, aspect=3.0)
+        #plt.xlim([-0.1,len(subArray)])
+        #img = plt.bar(np.arange(len(subArray)), subArray, color="red")
+        img = plt.imshow([subArray], cmap=colorMap)
+    elif(pixelType=='rectangle'):
+        # For plotting rectangular pixels
+        img = plt.imshow([subArray], cmap=colorMap, aspect=3.0)
     else:
         print("\nERROR: Unknown pixelType specified!\n")
         sys.exit(-1)
@@ -168,15 +169,6 @@ def plotMinMax(dataArray, outFile, beg, end, \
     #To make the colors consistent if there are submatrices.
     #plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
 
-    # if(sequence!=None):
-    #     mySeqFile = SeqIO.read(sequence, 'fasta')
-    #     #Convert aaOrder to a list.
-    #     aaOrderList = list(aaOrder)
-    #     for i in range (len(subArray)):
-    #         j = beg-1+i
-    #         # print(i, aaOrderList.index(sequence[i]))
-    #         plt.scatter(i, aaOrderList.index(mySeqFile.seq[j]), s=5, c='black', marker='o')
-    
     # if(isColorBarOn):
     #     from mpl_toolkits.axes_grid1 import make_axes_locatable
     #     divider = make_axes_locatable(ax)
@@ -188,25 +180,71 @@ def plotMinMax(dataArray, outFile, beg, end, \
     if(interactive):
         plt.show()
     
-
-    #plt.imsave('output.png', subArray)
     plt.close()
 
-
 def plotsApp(args):
-    if args.inputfile == None:
-        print('Usage: python demust.py [-h] [-i INPUTFILE] [-d GEMME]')
-        print('\nError: missing arguments: Please provide --inputfile and/or --datatype')
-        sys.exit(-1)
+    # if args.inputfile == None:
+    #     print('Usage: python demust.py [-h] [-i INPUTFILE] [-d GEMME]')
+    #     print('\nError: missing arguments: Please provide --inputfile and/or --datatype')
+    #     sys.exit(-1)
 
     print("\nRunning 'demust plots' app...\n")
     if (args.datatype.lower()=='gemme'): 
         scanningMatrix = parseGEMMEoutput(args.inputfile, verbose=False)
 
-    if((args.type.lower()=='min') or (args.type.lower()=='max')):
-        dataArray = getMinMaxData(scanningMatrix, args.type, outfile=args.outputfile, printDetails=False)
+        if((args.type.lower()=='min')):
+            dataArray = getMinMaxData(scanningMatrix, args.type, \
+                                      outfile=args.outputfile+".dat",\
+                                      printDetails=False)
+            dataArray = rankdata((-1.0)*np.array(dataArray))/float(len(dataArray))
+            plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+                         colorMap = 'Reds', \
+                         offSet=0, pixelType='square',
+                         interactive=False)
+        else:
+            print("ERROR: Unknown plot type!{}".format(args.type.lower()))
+            sys.exit(-1)
+    elif (args.datatype.lower()=='riesselman'):
 
-    else:
-        print("ERROR: Unknown plot type!{}".format(args.type.lower()))
-        sys.exit(-1)
+        # Please note that we are not using Riesselman, 2016 csv files here directly. 
+        # We are using the newly created csv files produced by 
+        # demust riesselman utility. The converted format looks like old GEMME format.
+        # Namely, each column contains the results of 20 mutations of a certain aa position. 
+        
+        df = pd.read_csv(args.inputfile)
+        #Drop the aa names column
+        df = df.iloc[: , 1:]
+
+        scanningMatrix = df.to_numpy()
+        scanningMatrix = np.ma.array(scanningMatrix, mask=np.isnan(scanningMatrix))
+        # print(scanningMatrix)
+        if((args.type.lower()=='max')):
+            # Please note that max value may/might represent wild-type like behaviour. 
+            # Here, we are trying to highlight the most deleterious locations.
+            # The following four lines of data processing are performed for this purpose. 
+            dataArray = getMinMaxData(scanningMatrix, args.type, \
+                                      outfile=args.outputfile+".dat",\
+                                      printDetails=False)
+            dataArray = rankdata((-1.0)*np.array(dataArray))/float(len(dataArray))
+
+            plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+                          colorMap = 'Reds', \
+                          offSet=0, pixelType='square',\
+                          interactive=False)
+
+        else:
+            print("ERROR: Unknown plot type!{}".format(args.type.lower()))
+            sys.exit(-1)
+    elif (args.datatype.lower()=='jet'):
+        df = pd.read_csv(args.inputfile, delimiter=r"\s+")
+        dataArray = (df['trace'].to_numpy())
+        if((args.type.lower()=='trace')):
+            print(dataArray)
+            plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+                          colorMap = 'Greens', \
+                          offSet=0, pixelType='square',\
+                          interactive=False)
+
     
+    else:
+        print("ERROR: Unknown data type: {}.".format(args.datatype))

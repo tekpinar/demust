@@ -48,6 +48,9 @@ def mapsApp(args):
                 plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
                     colorMap=args.colormap, offSet=args.offset, pixelType='square',\
                     aaOrder=args.aaorder, sequence=args.sequence)
+                # plotDecoratedMatrix(gemmeData, args.outputfile, args.beginning, args.end,\
+                #     colorMap=args.colormap, offSet=args.offset, pixelType='square',\
+                #     aaOrder=args.aaorder, sequence=args.sequence)
 
     elif (args.datatype.lower()==('rhapsody' or 'rapsody')):
         rhapsodyData = parseRHAPSODYoutput(args.inputfile, field=args.field)
@@ -104,6 +107,18 @@ def mapsApp(args):
             plotGEMMEmatrix(foldxData, args.outputfile, args.beginning, args.end,\
                 colorMap=args.colormap, offSet=args.offset, pixelType='square',\
                 aaOrder=args.aaorder, sequence=args.sequence)
+    elif (args.datatype.lower()=='proteingym'):
+        expDataMatrix = parseExperimentalData(args.inputfile, \
+                                            experiment="DMS_score",\
+                                            outputcsv=None,\
+                                            debug = False,\
+                                            datasource="proteingym")
+        # Plot the experimental DMS map with wild-type residues annotated with dots.
+        plotExperimentalMatrix(expDataMatrix, args.outputfile, \
+                               args.beginning, args.end, \
+                               colorMap = args.colormap, offSet=args.offset, \
+                               pixelType='square', aaOrder=args.aaorder, \
+                               sequence=args.sequence, interactive=True)
 
     else:
         print("\nError: Unknown data type!")

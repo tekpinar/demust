@@ -4,8 +4,10 @@ import sys
 import argparse
 import numpy as np
 import matplotlib.pylab as plt
+from matplotlib.gridspec import GridSpec
 from Bio import SeqIO
 import pandas as pd
+from scipy.stats import rankdata
 
 
 alphabeticalAminoAcidsList = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
@@ -186,6 +188,377 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
 
     #plt.imsave('output.png', subMatrix)
     plt.close()
+
+
+def plotDecoratedMatrix2(scanningMatrix, outFile, beg, end, \
+                    colorMap = 'coolwarm', \
+                    offSet=0, pixelType='square',
+                    aaOrder="ACDEFGHIKLMNPQRSTVWY", \
+                    sequence=None,\
+                    interactive=True,\
+                    isColorBarOn=False):
+    """
+        A function to plot deep mutational scanning matrices. 
+  
+    Parameters
+    ----------
+    scanningMatrix: numpy array of arrays
+        Data matrix to plot
+
+    outFile: string
+        Name of the output image without file extension.
+        Default file extension (png) is added by the program
+    
+    beg: int
+        The first residue to use. It is used to select a subrange 
+        of amino acids. It starts from 1.
+    
+    end: int
+        The last residue to use. It is used to select a subrange 
+        of amino acids.
+
+    colorMap: matplotlib cmap
+        Any colormap existing in matplotlib.
+        Default is coolwarm. 
+
+    offSet: int
+        It is used to match the residue IDs in your PDB
+        file with 0 based indices read from scanningMatrix matrix
+
+    pixelType: string
+        It can only have 'square' or 'rectangle' values.
+        It is a matter of taste but I added it as an option.
+        Default is 'square'
+
+    sequence: string
+        A fasta file of one letter amino acid codes from N terminal to C terminal. 
+
+    interactive: bool
+        If True, it will plot the map interactively. 
+
+    isColorBarOn: bool
+        If True, it will show a colorbar to show the numerical scale of
+        the colors. Default is False. 
+
+    Returns
+    -------
+    Nothing
+
+    """
+
+    #We subtract 1 from beg bc matrix indices starts from 0
+    if(end == None):
+        end = len(scanningMatrix[0])
+
+    print("Beginning: "+str(beg))
+    print("End      : "+str(end))
+    
+    print(len(scanningMatrix[0]))
+    subMatrix = scanningMatrix[:, (beg-1):end]
+    #print(subMatrix)
+
+    ##########################################################################
+    # Set plotting parameters
+    nres_shown = len(subMatrix[0])
+    fig_height=8
+    # figure proportions
+    fig_width = fig_height/2  # inches
+    fig_width *= nres_shown/20
+    
+    fig, ax = plt.subplots(2, 1, figsize=(fig_width, fig_height))
+
+    wspace = 0.5  # inches
+    plt.subplots_adjust(wspace=wspace/fig_width, hspace=0.15)
+
+    # figure structure
+    gs = GridSpec(2, 1, height_ratios=[1, 5])
+    ax0 = plt.subplot(gs[0])  # secondary structure strip
+    ax1 = plt.subplot(gs[1])  # mutagenesis table
+    # axcb = plt.subplot(gs[1, 1])  # colorbar
+    # ax2 = plt.subplot(gs[2, 0])  # average profile
+
+    if (nres_shown >150):
+        majorTics = 50
+    else:
+        majorTics = 20
+
+
+    major_nums_x = np.arange(majorTics, len(subMatrix[0]), majorTics, dtype=int)
+    #major_nums_x = major_nums_x -1
+    major_nums_x = np.insert(major_nums_x, 0, 0)
+    #print(major_nums_x)
+
+    minor_nums_x = np.arange(10, len(subMatrix[0]), 10, dtype=int)
+    #minor_nums_x = minor_nums_x - 1
+    minor_nums_x = np.insert(minor_nums_x, 0, 0)
+    #print(minor_nums_x)
+
+    major_labels_x = major_nums_x + 1 + offSet
+
+    major_nums_y = np.arange(0, 20, 1, dtype=int)
+    major_labels_y = list(aaOrder)
+
+    plt.xticks(major_nums_x, major_labels_x, size=28)
+    ax1.set_xticks(minor_nums_x, minor=True)
+    
+    plt.yticks(major_nums_y, major_labels_y, size=16)
+    ax1.set_yticklabels(major_labels_y, ha='left')
+    ax1.tick_params(axis='y', which='major', pad=30)
+
+    
+    #############################################################################
+    if(pixelType=='square'):
+        #For plotting square pixels
+        img = plt.imshow(subMatrix, cmap=colorMap)
+    elif(pixelType=='rectangle'):
+        #For plotting rectangular pixels
+        img = plt.imshow(subMatrix, cmap=colorMap, aspect=3.0)
+    else:
+        print("\nERROR: Unknown pixelType specified!\n")
+        sys.exit(-1)
+    
+    #To make the colors consistent if there are submatrices.
+    plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
+
+    if(sequence!=None):
+        mySeqFile = SeqIO.read(sequence, 'fasta')
+        #Convert aaOrder to a list.
+        aaOrderList = list(aaOrder)
+        for i in range (len(subMatrix[0])):
+            j = beg-1+i
+            # print(i, aaOrderList.index(sequence[i]))
+            plt.scatter(i, aaOrderList.index(mySeqFile.seq[j]), s=5, c='black', marker='o')
+    
+    if(isColorBarOn):
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="1%", pad=0.2)
+        plt.colorbar(img, cax=cax)
+
+    decorated = True
+    if(decorated == True):
+        ax0.bar(np.arange(len(scanningMatrix[0])), np.random.rand(len(scanningMatrix[0])))
+
+
+    plt.tight_layout()
+    plt.savefig(outFile+".png")
+    if(interactive):
+        plt.show()
+    
+
+    #plt.imsave('output.png', subMatrix)
+    plt.close()
+def plotDecoratedMatrix(scanningMatrix, outFile, beg, end, \
+                    colorMap = 'coolwarm', \
+                    offSet=0, pixelType='square',
+                    aaOrder="ACDEFGHIKLMNPQRSTVWY", \
+                    sequence=None,\
+                    interactive=True,\
+                    isColorBarOn=False):
+    """
+        A function to plot deep mutational scanning matrices. 
+  
+    Parameters
+    ----------
+    scanningMatrix: numpy array of arrays
+        Data matrix to plot
+
+    outFile: string
+        Name of the output image without file extension.
+        Default file extension (png) is added by the program
+    
+    beg: int
+        The first residue to use. It is used to select a subrange 
+        of amino acids. It starts from 1.
+    
+    end: int
+        The last residue to use. It is used to select a subrange 
+        of amino acids.
+
+    colorMap: matplotlib cmap
+        Any colormap existing in matplotlib.
+        Default is coolwarm. 
+
+    offSet: int
+        It is used to match the residue IDs in your PDB
+        file with 0 based indices read from scanningMatrix matrix
+
+    pixelType: string
+        It can only have 'square' or 'rectangle' values.
+        It is a matter of taste but I added it as an option.
+        Default is 'square'
+
+    sequence: string
+        A fasta file of one letter amino acid codes from N terminal to C terminal. 
+
+    interactive: bool
+        If True, it will plot the map interactively. 
+
+    isColorBarOn: bool
+        If True, it will show a colorbar to show the numerical scale of
+        the colors. Default is False. 
+
+    Returns
+    -------
+    Nothing
+
+    """
+
+    #We subtract 1 from beg bc matrix indices starts from 0
+    if(end == None):
+        end = len(scanningMatrix[0])
+
+    print("Beginning: "+str(beg))
+    print("End      : "+str(end))
+    
+    print(len(scanningMatrix[0]))
+    subMatrix = scanningMatrix[:, (beg-1):end]
+    #print(subMatrix)
+
+    ##########################################################################
+    # Set plotting parameters
+    nres_shown = len(subMatrix[0])
+    fig_height=8
+    # figure proportions
+    fig_width = fig_height/2  # inches
+    fig_width *= nres_shown/20
+    
+    fig, ax = plt.subplots(2, figsize=(fig_width, fig_height), \
+                            sharex=True)
+                            #, gridspec_kw={'height_ratios': [0.1, 1], 'width_ratios': [1]}
+                            #, subplot_kw={'aspect':'equal'})
+    wspace = 0.5  # inches
+    plt.subplots_adjust(wspace=0)
+    # adjust subplot sizes
+    # gs = GridSpec(2, 1, width_ratios=[1])
+
+    if (nres_shown >150):
+        majorTics = 50
+    else:
+        majorTics = 20
+
+
+    major_nums_x = np.arange(majorTics, len(subMatrix[0]), majorTics, dtype=int)
+    #major_nums_x = major_nums_x -1
+    major_nums_x = np.insert(major_nums_x, 0, 0)
+    #print(major_nums_x)
+
+    minor_nums_x = np.arange(10, len(subMatrix[0]), 10, dtype=int)
+    #minor_nums_x = minor_nums_x - 1
+    minor_nums_x = np.insert(minor_nums_x, 0, 0)
+    #print(minor_nums_x)
+
+    major_labels_x = major_nums_x + 1 + offSet
+
+    major_nums_y = np.arange(0, 20, 1, dtype=int)
+    major_labels_y = list(aaOrder)
+
+    plt.xticks(major_nums_x, major_labels_x, size=28)
+    ax[1].set_xticks(minor_nums_x, minor=True)
+    
+    plt.yticks(major_nums_y, major_labels_y, size=6)
+    ax[1].set_yticklabels(major_labels_y, ha='left')
+    ax[1].tick_params(axis='y', which='major', pad=30)
+
+    
+    #############################################################################
+    if(pixelType=='square'):
+        #For plotting square pixels
+        img = plt.imshow(subMatrix, cmap=colorMap)
+    elif(pixelType=='rectangle'):
+        #For plotting rectangular pixels
+        img = plt.imshow(subMatrix, cmap=colorMap, aspect=3.0)
+    else:
+        print("\nERROR: Unknown pixelType specified!\n")
+        sys.exit(-1)
+    
+    #To make the colors consistent if there are submatrices.
+    plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
+
+    if(sequence!=None):
+        mySeqFile = SeqIO.read(sequence, 'fasta')
+        #Convert aaOrder to a list.
+        aaOrderList = list(aaOrder)
+        for i in range (len(subMatrix[0])):
+            j = beg-1+i
+            # print(i, aaOrderList.index(sequence[i]))
+            plt.scatter(i, aaOrderList.index(mySeqFile.seq[j]), s=5, c='black', marker='o')
+    
+    if(isColorBarOn):
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        divider = make_axes_locatable(ax[0])
+        cax = divider.append_axes("right", size="1%", pad=0.2)
+        plt.colorbar(img, cax=cax)
+
+    decorated = True
+    if(decorated == True):
+        ax[0].set_aspect(10)
+        dataArray = getMinMaxData(scanningMatrix, 'min', outfile=None, printDetails=False)
+        dataArray = rankdata((-1.0)*np.array(dataArray))/float(len(dataArray))
+        ax[0].bar(np.arange(len(dataArray)), dataArray, color='red')
+
+
+    
+    
+    if(interactive):
+        plt.show()
+    fig.tight_layout()
+    fig.savefig(outFile+".png")
+
+    #plt.imsave('output.png', subMatrix)
+    plt.close()
+
+def getMinMaxData(scanningMatrix, type, outfile, printDetails=False):
+    """
+        This function gets min and max for each column (namely,
+        over all variants at a certain position). 
+
+    Parameters
+    ----------
+    scanningMatrix: numpy array of arrays
+        Data matrix to rank normalize
+    type: string
+        type can only be min or max.    
+    outfile: string
+        Prefix for the output file.
+    printDetails: a boolean value
+        If True, it will print details for debugging (Default: False)
+    Returns
+    -------
+    Nothing
+    """
+
+    data = []
+    
+    if(type.lower()=='max'):
+        for col in range(len(scanningMatrix[0])):
+            X_max = (scanningMatrix.T[col].max())            
+            # FILE.write("{}\t{}\n".format(col, X_max))
+            data.append(X_max)
+            
+            if(printDetails):
+                print(scanningMatrix.T[col])
+        
+    elif(type.lower()=='min'):
+        for col in range(len(scanningMatrix[0])):
+            X_min = (scanningMatrix.T[col].min())
+            # FILE.write("{}\t{}\n".format(col, X_min))
+            data.append(X_min)
+
+            if(printDetails):
+                print(scanningMatrix.T[col])
+    else:
+        print("ERROR: Unknown type!")
+        print("       Type can only be min or max!")
+        sys.exit(-1)
+    if(outfile != None):
+        FILE = open(outfile, "w")
+        for i in range (len(data)):
+            FILE.write("{}\t{}\n".format(i, data[i]))
+        FILE.close()
+    return data
+
+
 
 def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
                     colorMap = 'coolwarm', \
@@ -704,12 +1077,14 @@ def rankNormalization(scanningMatrix, printDetails=False):
 
     return np.array(rankNormalizedData).T
 
-def parseRiesselmanData(inputcsv, experiment='DMS_score', 
+def parseExperimentalData(inputcsv, experiment='DMS_score', 
                             outputcsv="convertedMatrix.csv",
-                            debug = False):
+                            debug = False, datasource="proteingym"):
     """
-        Parse Riesselman experimental data files from the
-        https://www.nature.com/articles/s41592-018-0138-4
+        Parse Riesselman or ProteinGym experimental data files from the
+        https://www.nature.com/articles/s41592-018-0138-4 and 
+        https://doi.org/10.48550/arXiv.2205.13760
+
 
     Parameters
     ----------
@@ -717,14 +1092,20 @@ def parseRiesselmanData(inputcsv, experiment='DMS_score',
         Name of the experimental input data file in csv format
     
     experiment: string
-        Name of the experiment such as score, screenscorem, fitness,
-        abundance.  
+        Name of the experiment such as score, screenscore, fitness,
+        abundance. To parse ProteinGym data, set this value to 
+        'DMS_score'.
 
     outputcsv: string
         Name of the output data file in csv format.
 
     debug: bool
         If True, it will print some extra data to stdout. 
+    
+    datasource: string
+        It should take 'proteingym' value if you want to parse
+        ProteinGym data. Otherwise, don't use it. In this case,
+        it assumes that the datasource is Riesseman, 2016 csv files.
 
     Returns
     -------
@@ -732,8 +1113,10 @@ def parseRiesselmanData(inputcsv, experiment='DMS_score',
         an experimental parameter for an amino acid mutation.
         Rows of the matrix are amino acids in alphabetical order. 
     """
-    
-    df = pd.read_csv(inputcsv, sep=";", decimal=",")
+    if(datasource == "proteingym"):
+        df = pd.read_csv(inputcsv)
+    else:
+        df = pd.read_csv(inputcsv, sep=";", decimal=",")
 
     #Add three new columns.
     df['wt'] = ""

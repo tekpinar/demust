@@ -51,7 +51,7 @@ def riesselmanApp(args):
     # I decided to skip that part! 
 
     # Read the experimental DMS map
-    scanningMatrixExp = parseRiesselmanData(args.dataset, experiment=args.experiment, \
+    scanningMatrixExp = parseExperimentalData(args.dataset, experiment=args.experiment, \
                                             outputcsv=args.output+".csv")
     print(len(scanningMatrixExp[1]))
 

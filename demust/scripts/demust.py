@@ -62,7 +62,7 @@ def main():
         required=True, default=None)
 
     maps_parser.add_argument('-d', '--datatype', dest='datatype', type=str, \
-        help='gemme, rhapsody, foldx or evmutation', \
+        help='gemme, rhapsody, foldx, evmutation or proteingym', \
         required=False, default='gemme')
 
     maps_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
@@ -111,8 +111,14 @@ def main():
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
     plots_parser.add_argument('-d', '--datatype', dest='datatype', type=str, \
-        help='gemme, rhapsody, foldx or evmutation', \
+        help='gemme, rhapsody, foldx, evmutation, or riesselman.', \
         required=False, default='gemme')
+    plots_parser.add_argument('-b', '--beginning', dest='beginning', type=int, \
+        help='An integer to indicate the first residue index.',
+        required=False, default=1)
+    plots_parser.add_argument('-e', '--end', dest='end', type=int, \
+        help='An integer to indicate the final residue index.',
+        required=False, default=None)
     plots_parser.add_argument('-t', '--type', dest='type', type=str, \
         help='Type of the 2D data that you want to extract. \n It can be min or max.', \
         required=False, default=False)
