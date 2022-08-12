@@ -111,7 +111,7 @@ def main():
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
     plots_parser.add_argument('-d', '--datatype', dest='datatype', type=str, \
-        help='gemme, rhapsody, foldx, evmutation, or riesselman.', \
+        help='gemme, rhapsody, foldx, evmutation, riesselman, jet or pdb.', \
         required=False, default='gemme')
     plots_parser.add_argument('-b', '--beginning', dest='beginning', type=int, \
         help='An integer to indicate the first residue index.',
@@ -120,7 +120,7 @@ def main():
         help='An integer to indicate the final residue index.',
         required=False, default=None)
     plots_parser.add_argument('-t', '--type', dest='type', type=str, \
-        help='Type of the 2D data that you want to extract. \n It can be min or max.', \
+        help='Type of the 2D data that you want to extract. \n It can be min or max for DMS maps. It can be trace, pc or cv for JET files.', \
         required=False, default=False)
     plots_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
         help='Name of the output file.', \

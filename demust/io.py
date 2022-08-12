@@ -508,7 +508,7 @@ def plotDecoratedMatrix(scanningMatrix, outFile, beg, end, \
     #plt.imsave('output.png', subMatrix)
     plt.close()
 
-def getMinMaxData(scanningMatrix, type, outfile, printDetails=False):
+def getMinMaxData(scanningMatrix, type, outfile, printDetails=False, ranksort=True):
     """
         This function gets min and max for each column (namely,
         over all variants at a certain position). 
@@ -538,7 +538,9 @@ def getMinMaxData(scanningMatrix, type, outfile, printDetails=False):
             
             if(printDetails):
                 print(scanningMatrix.T[col])
-        
+        if(ranksort == True):
+            data = rankdata(np.array(data))/float(len(data))
+
     elif(type.lower()=='min'):
         for col in range(len(scanningMatrix[0])):
             X_min = (scanningMatrix.T[col].min())
@@ -547,6 +549,9 @@ def getMinMaxData(scanningMatrix, type, outfile, printDetails=False):
 
             if(printDetails):
                 print(scanningMatrix.T[col])
+        if(ranksort == True):
+            data = rankdata((-1.0)*np.array(data))/float(len(data))
+
     else:
         print("ERROR: Unknown type!")
         print("       Type can only be min or max!")
@@ -1136,11 +1141,11 @@ def parseExperimentalData(inputcsv, experiment='DMS_score',
     #Create a new dataframe from only the necessary columns
     new_df = df[['wt','resid', 'mutation', experiment]].copy()
     if(debug):
-        print(new_df)
+        print(list(new_df['resid']))
 
-    minResid = (new_df['resid'].min())
-    maxResid = (new_df['resid'].max())
-
+    minResid = new_df['resid'].min()
+    maxResid = new_df['resid'].max()
+    
     numCols = maxResid - minResid + 1
 
     print(numCols)

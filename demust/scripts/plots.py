@@ -1,7 +1,10 @@
+from typing import OrderedDict
 from demust.io import *
 import argparse
 from scipy.stats import rankdata
 import pandas as pd
+import prody
+import sys
 
 # def getMinMaxData(scanningMatrix, type, outfile, printDetails=False):
 #     """
@@ -103,8 +106,9 @@ def plot1DHeatMap(dataArray, outFile, beg, end, \
     Nothing
 
     """
-    print(dataArray)
-    print(np.arange(len(dataArray)))
+    # print(dataArray)
+    # print(np.arange(len(dataArray)))
+    #dataArray = np.ma.array (dataArray, mask=np.isnan(dataArray))
     #We subtract 1 from beg bc matrix indices starts from 0
     if(end == None):
         end = len(dataArray)
@@ -181,13 +185,20 @@ def plot1DHeatMap(dataArray, outFile, beg, end, \
         plt.show()
     
     plt.close()
+def option6(a, order='descending'):
+    b = -a if order=='descending' else a        
+    idx = b.argsort(0,'stable')
+    n = idx.shape
+    out = np.empty(n, dtype=float)
+    np.put_along_axis(out, idx, np.arange(1,n+1), axis=0)
+    return np.where(np.isnan(a), np.nan, out)
 
 def plotsApp(args):
     # if args.inputfile == None:
     #     print('Usage: python demust.py [-h] [-i INPUTFILE] [-d GEMME]')
     #     print('\nError: missing arguments: Please provide --inputfile and/or --datatype')
     #     sys.exit(-1)
-
+    debug = True
     print("\nRunning 'demust plots' app...\n")
     if (args.datatype.lower()=='gemme'): 
         scanningMatrix = parseGEMMEoutput(args.inputfile, verbose=False)
@@ -195,8 +206,8 @@ def plotsApp(args):
         if((args.type.lower()=='min')):
             dataArray = getMinMaxData(scanningMatrix, args.type, \
                                       outfile=args.outputfile+".dat",\
-                                      printDetails=False)
-            dataArray = rankdata((-1.0)*np.array(dataArray))/float(len(dataArray))
+                                      printDetails=False, ranksort=True)
+            #dataArray = rankdata((-1.0)*np.array(dataArray))/float(len(dataArray))
             plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
                          colorMap = 'Reds', \
                          offSet=0, pixelType='square',
@@ -210,24 +221,47 @@ def plotsApp(args):
         # We are using the newly created csv files produced by 
         # demust riesselman utility. The converted format looks like old GEMME format.
         # Namely, each column contains the results of 20 mutations of a certain aa position. 
-        
+
         df = pd.read_csv(args.inputfile)
         #Drop the aa names column
         df = df.iloc[: , 1:]
 
         scanningMatrix = df.to_numpy()
+        # print(scanningMatrix)   
         scanningMatrix = np.ma.array(scanningMatrix, mask=np.isnan(scanningMatrix))
-        # print(scanningMatrix)
-        if((args.type.lower()=='max')):
+        if((args.type.lower()=='max') or (args.type.lower()=='min')):
             # Please note that max value may/might represent wild-type like behaviour. 
             # Here, we are trying to highlight the most deleterious locations.
             # The following four lines of data processing are performed for this purpose. 
             dataArray = getMinMaxData(scanningMatrix, args.type, \
                                       outfile=args.outputfile+".dat",\
-                                      printDetails=False)
-            dataArray = rankdata((-1.0)*np.array(dataArray))/float(len(dataArray))
+                                      printDetails=False, ranksort=False)
 
-            plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+            # print(dataArray)
+            data = np.nan_to_num(np.array(dataArray), nan=np.array(dataArray).max())
+            # np.ma.array(dataArray, mask=np.isnan(dataArray))    
+            # print(data)
+            # #dataArray = rankdata((-1.0)*np.array(dataArray))/float(len(dataArray))
+            temp = []
+            nanLocations = []
+            j = 0
+            nonNanLocations = OrderedDict()
+            for i in range(len(data)):
+                if(np.isnan(data[i])):
+                    nanLocations.append(i)
+                else:
+                    temp.append(data[i])
+                    nonNanLocations[i]=j
+                    j = j+1
+            if((args.type.lower()=='min')):
+                temp = 1.0 - (rankdata(np.array(temp))/float(len(temp)))
+            else:
+                temp = (rankdata(np.array(temp))/float(len(temp)))
+            for key, value in nonNanLocations.items():
+                # print(key, value)
+                dataArray[key] = temp[nonNanLocations[key]]
+            np.savetxt(args.outputfile+".dat", dataArray)
+            plot1DHeatMap(np.array(dataArray), args.outputfile, beg=args.beginning, end=args.end, \
                           colorMap = 'Reds', \
                           offSet=0, pixelType='square',\
                           interactive=False)
@@ -237,14 +271,50 @@ def plotsApp(args):
             sys.exit(-1)
     elif (args.datatype.lower()=='jet'):
         df = pd.read_csv(args.inputfile, delimiter=r"\s+")
-        dataArray = (df['trace'].to_numpy())
+        
         if((args.type.lower()=='trace')):
-            print(dataArray)
-            plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
-                          colorMap = 'Greens', \
-                          offSet=0, pixelType='square',\
-                          interactive=False)
-
+            if 'trace' in df.columns:
+                dataArray = (df['trace'].to_numpy())
+                if(debug):
+                    print(dataArray)
+                plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+                            colorMap = 'Greens', \
+                            offSet=0, pixelType='square',\
+                            interactive=False)
+            else:
+                print("ERROR: The file does not contain a column called 'trace'!")
+                sys.exit(-1)
+        elif((args.type.lower()=='pc')):
+            if 'pc' in df.columns:
+                dataArray = (df['pc'].to_numpy())
+                if(debug):
+                    print(dataArray)
+                plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+                            colorMap = 'Blues', \
+                            offSet=0, pixelType='square',\
+                            interactive=False)
+            else:
+                print("ERROR: The file does not contain a column called 'pc'!")
+                sys.exit(-1)
+        elif((args.type.lower()=='cv')):
+            if 'cv' in df.columns:
+                dataArray = (df['cv'].to_numpy())
+                if(debug):
+                    print(dataArray)
+                plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+                            colorMap = 'Oranges', \
+                            offSet=0, pixelType='square',\
+                            interactive=False)
+            else:
+                print("ERROR: The file does not contain a column called 'cv'!")
+                sys.exit(-1)
+        else:
+            print("ERROR: You can only obtain trace, pc or cv from a jet results file!")
+            sys.exit(-1)
     
+    elif (args.datatype.lower()=='pdb'):
+        performDSSP(args.inputfile, parseall=False, stderr=True) 
+        structure = parsePDB(args.inputfile)
+
     else:
         print("ERROR: Unknown data type: {}.".format(args.datatype))

@@ -47,7 +47,7 @@ def mapsApp(args):
             else:
                 plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
                     colorMap=args.colormap, offSet=args.offset, pixelType='square',\
-                    aaOrder=args.aaorder, sequence=args.sequence)
+                    aaOrder=args.aaorder, sequence=args.sequence, interactive=False)
                 # plotDecoratedMatrix(gemmeData, args.outputfile, args.beginning, args.end,\
                 #     colorMap=args.colormap, offSet=args.offset, pixelType='square',\
                 #     aaOrder=args.aaorder, sequence=args.sequence)
@@ -118,7 +118,7 @@ def mapsApp(args):
                                args.beginning, args.end, \
                                colorMap = args.colormap, offSet=args.offset, \
                                pixelType='square', aaOrder=args.aaorder, \
-                               sequence=args.sequence, interactive=True)
+                               sequence=args.sequence, interactive=False)
 
     else:
         print("\nError: Unknown data type!")

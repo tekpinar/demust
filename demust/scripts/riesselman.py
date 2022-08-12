@@ -52,7 +52,8 @@ def riesselmanApp(args):
 
     # Read the experimental DMS map
     scanningMatrixExp = parseExperimentalData(args.dataset, experiment=args.experiment, \
-                                            outputcsv=args.output+".csv")
+                                            outputcsv=args.output+".csv", debug=False, \
+                                            datasource="riesselman")
     print(len(scanningMatrixExp[1]))
 
     # Plot the experimental DMS map with wild-type residues annotated with dots.
