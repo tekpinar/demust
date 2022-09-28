@@ -8,11 +8,58 @@ import numpy as np
 from demust.io import *
 from demust.scripts.compare import compareMapsSpearman
 import matplotlib.pylab as plt
-from Bio import SeqIO
+#from Bio import SeqIO
 #import seaborn as sns
 
 # alphabeticalAminoAcidsList = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
 #                               'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+
+def experimental2dat(inputcsv, experiment='DMS_score', 
+                            outputcsv="convertedMatrix.csv",
+                            debug = False, datasource="proteingym"):
+    """
+        Parse Riesselman or ProteinGym experimental data files from the
+        https://www.nature.com/articles/s41592-018-0138-4 and 
+        https://doi.org/10.48550/arXiv.2205.13760
+
+
+    Parameters
+    ----------
+    inputcsv: string
+        Name of the experimental input data file in csv format
+    
+    experiment: string
+        Name of the experiment such as score, screenscore, fitness,
+        abundance. To parse ProteinGym data, set this value to 
+        'DMS_score'.
+
+    outputcsv: string
+        Name of the output data file in csv format.
+
+    debug: bool
+        If True, it will print some extra data to stdout. 
+    
+    datasource: string
+        It should take 'proteingym' value if you want to parse
+        ProteinGym data. Otherwise, don't use it. In this case,
+        it assumes that the datasource is Riesseman, 2016 csv files.
+
+    Returns
+    -------
+    Data as a Numpy array, where each col contains 
+        an experimental parameter for an amino acid mutation.
+        Rows of the matrix are amino acids in alphabetical order. 
+    """
+    if(datasource == "proteingym"):
+        df = pd.read_csv(inputcsv)
+    else:
+        df = pd.read_csv(inputcsv, sep=";", decimal=",")
+        
+
+    header = ["mutant", experiment]
+    df.to_csv(outputcsv, columns = header, index=None, header=None, sep=' ')
+    print(df[['mutant', experiment]])
+
 def riesselmanApp(args):
 
     # riesselman_parser = argparse.ArgumentParser(description=\
@@ -50,19 +97,30 @@ def riesselmanApp(args):
     # #Read the main file that contains information about all datasets. 
     # I decided to skip that part! 
 
-    # Read the experimental DMS map
-    scanningMatrixExp = parseExperimentalData(args.dataset, experiment=args.experiment, \
-                                            outputcsv=args.output+".csv", debug=False, \
+
+    
+
+    if(args.otype == 'dat'):
+        # Read the experimental DMS map    
+        experimental2dat(args.dataset, experiment=args.experiment, \
+                                        outputcsv=args.output+".csv", \
+                                        debug=False, \
+                                        datasource="riesselman")
+
+    else:
+        # Read the experimental DMS map
+        scanningMatrixExp = parseExperimentalData(args.dataset,\
+                                            experiment=args.experiment, \
+                                            outputcsv=args.output+".csv",\
+                                            debug=False, \
                                             datasource="riesselman")
-    print(len(scanningMatrixExp[1]))
-
-    # Plot the experimental DMS map with wild-type residues annotated with dots.
-    plotExperimentalMatrix(scanningMatrixExp, outFile=args.output, beg=1, \
-                            end=len(scanningMatrixExp[1]), \
-                            colorMap = args.colormap, \
-                            sequence=args.sequence, pixelType='square',
-                            interactive=False)
-
+        print(len(scanningMatrixExp[1]))
+        # Plot the experimental DMS map with wild-type residues annotated with dots.
+        plotExperimentalMatrix(scanningMatrixExp, outFile=args.output, beg=1, \
+                                end=len(scanningMatrixExp[1]), \
+                                colorMap = args.colormap, \
+                                sequence=args.sequence, pixelType='square',
+                                interactive=False)
     sys.exit()
     # Read the GEMME DMS map
     scanningMatrixGEMME = parseGEMMEoutput(path+args.protein.upper()+"/CALM1_normPred_evolCombi.txt", verbose=False)

@@ -9,4 +9,4 @@ Purpose     : A Python toolkit to modify, visualize and analyze deep mutational
 
 __all__ = ['maps', 'plots', 'compare', 'convert', 'removegaps']
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'

@@ -5,11 +5,14 @@
 """
 import argparse
 from demust.io import *
+from Bio import SeqIO
+#import pandas as pd
 
 def convertApp(args):
     if (args.inputfile == None):
         print('Usage: demust convert [-h] [-i INPUTFILE] [--itype GEMME] [-o OUTPUTFILE] [--otype GEMME]')
         print('\nError: missing arguments: Please provide --inputfile, --itype, --outputfile, --otype ')
+
         sys.exit(-1)
 
 
@@ -28,6 +31,7 @@ def convertApp(args):
         
     elif (args.itype.lower()=='foldx'):
         scanningMatrix = parseFOLDXoutput(args.inputfile, colorThreshhold=7.5, colorCorrect=True)
+       
     else:
         print("\nError: Unknown itype!")
         print("         Input data types can be gemme, rhapsody or foldx!")
@@ -36,10 +40,20 @@ def convertApp(args):
     aaOrderList = list(args.aaorder)
     print("\nWriting the residues in the following order:\n")
     print(aaOrderList)
+    localResidueList = None
+    if(args.fastafile != None):
+        referenceSeq = SeqIO.read(args.fastafile, 'fasta')
+        localResidueList = list(referenceSeq.seq)
+        #print(residueList)
+
     if (args.otype.lower()=='gemme'):
         writeGEMMEmatrix(scanningMatrix, args.outputfile, beg=0, end=None, \
                         aaOrder = aaOrderList, \
                         residueList = None,
+                        offSet=0)
+    elif (args.otype.lower()=='dms'):
+        writeDMSformat(scanningMatrix, args.outputfile, residueList = localResidueList,\
+                        beg=args.beginning, end=None, aaOrder = aaOrderList, \
                         offSet=0)
 
     # elif (args.otype.lower()==('rhapsody' or 'rapsody')):

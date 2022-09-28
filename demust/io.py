@@ -977,6 +977,94 @@ def writeGEMMEmatrix(scanningMatrix, outFile, beg, end, \
                     file.write(' ')
             file.write('\n')
 
+def writeDMSformat(scanningMatrix, outFile, residueList, 
+                    beg, end, \
+                    aaOrder = alphabeticalAminoAcidsList, \
+                    offSet=0):
+    """
+        A function to convert GEMME matrix format data to experimental 
+        deep mutational scanning format. 
+
+    The format has only two columns. In the first column, one-letter wild
+    type amino acid, residue number and mutated amino acid are combined without any
+    gap or any other character, such as A19C. The second column is typically a float
+    value of the predicted effect.
+    
+    Residue numbering starts with 1.
+    "A1A 0.211
+    "A1C 0.124
+    .
+    .
+    .
+    "T262 0.434
+
+    Parameters
+    ----------
+    scanningMatrix: numpy array of arrays
+        Data matrix to plot
+
+    outFile: string
+        Name of the output png image
+    
+    residueList: Python list
+        A list of the residues in the protein such as ['X1', 'X2', ..., 'XN']. 
+        X is one-letter amino acid code and N is the total number of residues. 
+        Default is None.
+        If not provided, the program will write them starting from 1 till the end. 
+
+    beg: int
+        The first residue in the fasta file may not necessarily be the first residue
+        in the protein. This beg parameter gives us a chance to adjust the first residue
+        other than one. It only effects the DMS format text output. Default value is 0.
+    
+    end: int
+        The last residue to use. It is used to select a subrange 
+        of amino acids.
+
+    aaOrder: Python list
+        A list of 20 amino acid characters such as ['A', 'C',...., 'Y'].  
+        Default is alphabetical list.
+
+    offSet: int
+        It is used to match the residue IDs in your PDB
+        file with 0 based indices read from scanningMatrix matrix
+
+    Returns
+    -------
+    Nothing
+
+    """
+    debug = 0
+
+    #We subtract 1 from beg bc matrix indices starts from 0
+    if(end == None):
+        end = len(scanningMatrix[0])
+
+    if(debug):
+        print("Beginning: "+str(beg))
+        print("End      : "+str(end))
+    
+        print(len(scanningMatrix[0]))
+
+    # I don't want to write the submatrices for now!
+    # Let's keep it simple for now! 
+    # subMatrix = scanningMatrix[:, (beg-1):end]
+    realResidueList = []
+    if(residueList == None):
+        for i in range(0,len(scanningMatrix[0])):
+            tempString = 'X'+str(i+1+beg)
+            realResidueList.append(tempString)
+    else:
+        for i in range(0,len(scanningMatrix[0])):
+            tempString = residueList[i]+str(i+1+beg)
+            realResidueList.append(tempString)
+
+    with open(outFile, 'w') as file:
+        for res in range (len(scanningMatrix[0])):
+            for i in range(20):
+                file.write(realResidueList[res]+aaOrder[i]+" ")
+                file.write(str(scanningMatrix[alphabeticalAminoAcidsList.index(aaOrder[i])][res])+"\n")
+
 def getGEMMEAverages(gemmeData):
     """
     Get GEMME columnwise averages from the normalized (?) data.

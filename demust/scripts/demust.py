@@ -165,6 +165,13 @@ def main():
     convert_parser.add_argument('--aaorder', dest='aaorder', type=str, \
         help='Amino acid order as a single string. Default is alphabetical: \"ACDEFGHIKLMNPQRSTVWY\"', \
         required=False, default='ACDEFGHIKLMNPQRSTVWY')
+    convert_parser.add_argument('-f', '--fastafile', dest='fastafile', type=str, \
+        help='A fasta file of a single gene to deduce amino acid order of the reference sequence.', \
+        required=False, default=None)
+    convert_parser.add_argument('-b', '--beginning', dest='beginning', type=int, \
+        help='An integer indicating the amount to add to the first residue index (1)."+\
+            " If not specified, nothing(0) will be added.',
+        required=False, default=0)
 
     #removegaps script argument parser
     removegaps_parser = subparsers.add_parser('removegaps')
@@ -179,7 +186,7 @@ def main():
 
     # riesselman script argument parsing
     riesselman_parser = subparsers.add_parser('riesselman', description=\
-        "This script will parse and plot experimental DMS maps from Riesselman, 2016.")
+        "This script will parse and plot experimental DMS maps from Riesselman, 2016 and ProteinGym datasets.")
 
     riesselman_parser.add_argument('-d', '--dataset', dest='dataset', type=str, \
         help='Name of the dataset that you want to retrieve.', \
@@ -204,6 +211,9 @@ def main():
     riesselman_parser.add_argument('-o', '--output', dest='output', type=str, \
         help='Name of the output file prefix for the csv and the png file. Default is output', \
         required=False, default='output')
+    riesselman_parser.add_argument('--otype', dest='otype', type=str, \
+        help='gemme or dat (each mutation in a single line, separated by single space). Default is gemme.', \
+        required=False, default='gemme')
 
     args = main_parser.parse_args()
 
