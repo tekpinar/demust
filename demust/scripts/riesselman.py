@@ -14,7 +14,7 @@ import matplotlib.pylab as plt
 # alphabeticalAminoAcidsList = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
 #                               'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
 
-def experimental2dat(inputcsv, experiment='DMS_score', 
+def experimental2singleline(inputcsv, experiment='DMS_score', 
                             outputcsv="convertedMatrix.csv",
                             debug = False, datasource="proteingym"):
     """
@@ -60,6 +60,221 @@ def experimental2dat(inputcsv, experiment='DMS_score',
     df.to_csv(outputcsv, columns = header, index=None, header=None, sep=' ')
     print(df[['mutant', experiment]])
 
+def experimental2mutfile(inputcsv, experiment='DMS_score', 
+                            output="converted.mut",
+                            debug = False, datasource="proteingym"):
+    """
+        Parse Riesselman or ProteinGym experimental data files from the
+        https://www.nature.com/articles/s41592-018-0138-4 and 
+        https://doi.org/10.48550/arXiv.2205.13760
+        are converted to mutation files where each single point mutation is
+        given in a single line. If there are multiple mutations separated by
+        columns (:), they also can be handled. The output 
+        mut file is used as input in the GEMME. 
+
+    Parameters
+    ----------
+    inputcsv: string
+        Name of the experimental input data file in csv format
+    
+    experiment: string
+        Name of the experiment such as score, screenscore, fitness,
+        abundance. To parse ProteinGym data, set this value to 
+        'DMS_score'.
+
+    output: string
+        Name of the output mut file.
+
+    debug: bool
+        If True, it will print some extra data to stdout. 
+    
+    datasource: string
+        It should take 'proteingym' value if you want to parse
+        ProteinGym data. Otherwise, don't use it. In this case,
+        it assumes that the datasource is Riesseman, 2016 csv files.
+
+    Returns
+    -------
+    Nothing: a mut file is written.  
+    """
+    if(datasource == "proteingym"):
+        df = pd.read_csv(inputcsv)
+    else:
+        df = pd.read_csv(inputcsv, sep=";", decimal=",")
+        
+
+    header = ["mutant", experiment]
+    print(df.columns)
+    df.to_csv(output, columns=["mutant"], index=None, header=None, sep=' ')
+    #print(df[['mutant', experiment]])
+
+def experimental2mutfileV2(inputcsv, shift=None, experiment='DMS_score', 
+                            output="converted.mut",
+                            debug = False, datasource="proteingym"):
+    """
+        Parse Riesselman or ProteinGym experimental data files from the
+        https://www.nature.com/articles/s41592-018-0138-4 and 
+        https://doi.org/10.48550/arXiv.2205.13760
+        are converted to mutation files where each single point mutation is
+        given in a single line. If there are multiple mutations separated by
+        columns (:), they also can be handled. The output 
+        mut file is used as input in the GEMME. 
+
+    Parameters
+    ----------
+    inputcsv: string
+        Name of the experimental input data file in csv format
+    shift: integer
+        An integer to shift residue numbering if number of amino acids in
+        the fasta file and experimental mutation list does not match.
+    experiment: string
+        Name of the experiment such as score, screenscore, fitness,
+        abundance. To parse ProteinGym data, set this value to 
+        'DMS_score'.
+    output: string
+        Name of the output mut file.
+    debug: bool
+        If True, it will print some extra data to stdout. 
+    datasource: string
+        It should take 'proteingym' value if you want to parse
+        ProteinGym data. Otherwise, don't use it. In this case,
+        it assumes that the datasource is Riesseman, 2016 csv files.
+
+    Returns
+    -------
+    Nothing: a mut file is written.  
+    """
+
+    print("Creating a mutations file from the experimental data.")
+    if(datasource == "proteingym"):
+        df = pd.read_csv(inputcsv)
+    else:
+        df = pd.read_csv(inputcsv, sep=";", decimal=",")
+        
+###############################################################################
+    # Fill the
+    if(shift == None):
+        if(debug):
+            print(df.columns)
+        df.to_csv(output, columns=["mutant"], index=None, header=None, sep=' ')
+        #print(df[['mutant', experiment]])
+        print("The mutations file was produced successfully!")
+    else:
+        df['mutantModif']=""
+        for index, row in df.iterrows():
+            tempString = row['mutant'].split(',|:')
+            if(len(tempString)==0):
+                print("ERROR: Your input file seems to be empty!")
+                sys.exit(-1)
+            elif(len(tempString)==1):
+                temp2 = int(tempString[0][1:-1]) - shift + 1
+                #print(index, row['mutant'], row['DMS_score'])
+                mutantModif = tempString[0][0] + str(temp2) + tempString[0][-1]
+                df.at[index, 'mutantModif'] = mutantModif
+            else:
+                print("ERROR: Your input file contains multiple point mutations!")
+                sys.exit(-1)
+                mutantModif = ""
+                for i in range (len(tempString)):
+                    temp2 = int(tempString[i][1:-1]) - shift + 1
+                    #print(index, row['mutant'], row['DMS_score'])
+                    if(i == (len(tempString) - 1)):
+                        mutantModif = mutantModif + tempString[i][0] + str(temp2) + tempString[i][-1]
+                    else:
+                        mutantModif = mutantModif + tempString[i][0] + str(temp2) + tempString[i][-1] + ":"
+                
+                df.at[index, 'mutantModif'] = mutantModif
+        if(debug):
+            print(df.columns)
+        df.to_csv(output, columns=["mutantModif"], index=None, header=None, sep=' ')
+        #print(df[['mutant', experiment]])
+        print("The mutations file was produced successfully!")
+
+def experimental2singlelineV2(inputcsv, shift=None, experiment='DMS_score', 
+                            output="converted.mut",
+                            debug = False, datasource="proteingym"):
+    """
+        Parse Riesselman or ProteinGym experimental data files from the
+        https://www.nature.com/articles/s41592-018-0138-4 and 
+        https://doi.org/10.48550/arXiv.2205.13760
+        are converted to data files where each single point mutation is
+        written on a single line. If there are multiple mutations separated by
+        columns (:), they also can be handled. The output 
+        dat file is used as input in the demust compare for Spearman correlation
+        comparison. 
+
+    Parameters
+    ----------
+    inputcsv: string
+        Name of the experimental input data file in csv format
+    shift: integer
+        An integer to shift residue numbering if number of amino acids in
+        the fasta file and experimental mutation list does not match.
+    experiment: string
+        Name of the experiment such as score, screenscore, fitness,
+        abundance. To parse ProteinGym data, set this value to 
+        'DMS_score'.
+    output: string
+        Name of the output mut file.
+    debug: bool
+        If True, it will print some extra data to stdout. 
+    datasource: string
+        It should take 'proteingym' value if you want to parse
+        ProteinGym data. Otherwise, don't use it. In this case,
+        it assumes that the datasource is Riesseman, 2016 csv files.
+
+    Returns
+    -------
+    Nothing: a mut file is written.  
+    """
+
+    print("Creating a single column data file from the experimental data.")
+    if(datasource == "proteingym"):
+        df = pd.read_csv(inputcsv)
+    else:
+        df = pd.read_csv(inputcsv, sep=";", decimal=",")
+        
+###############################################################################
+#Add a new column to the dataframe.
+    # Fill the
+    if(shift == None):
+        if(debug):
+            print(df.columns)
+        df.to_csv(output, columns=["mutant", experiment], index=None, header=None, sep=' ')
+        #print(df[['mutant', experiment]])
+        print("The single column experimental data file was produced successfully!")
+    else:
+        df['mutantModif']=""
+        for index, row in df.iterrows():
+            tempString = row['mutant'].split(',|:')
+            if(len(tempString)==0):
+                print("ERROR: Your input file seems to be empty!")
+                sys.exit(-1)
+            elif(len(tempString)==1):
+                temp2 = int(tempString[0][1:-1]) - shift + 1
+                #print(index, row['mutant'], row['DMS_score'])
+                mutantModif = tempString[0][0] + str(temp2) + tempString[0][-1]
+                df.at[index, 'mutantModif'] = mutantModif
+            else:
+                print("ERROR: Your input file contains multiple point mutations!")
+                sys.exit(-1)
+                mutantModif = ""
+                for i in range (len(tempString)):
+                    temp2 = int(tempString[i][1:-1]) - shift + 1
+                    #print(index, row['mutant'], row['DMS_score'])
+                    if(i == (len(tempString) - 1)):
+                        mutantModif = mutantModif + tempString[i][0] + str(temp2) + tempString[i][-1]
+                    else:
+                        mutantModif = mutantModif + tempString[i][0] + str(temp2) + tempString[i][-1] + ":"
+                
+                df.at[index, 'mutantModif'] = mutantModif
+        if(debug):
+            print(df.columns)
+        df.to_csv(output, columns=["mutantModif", experiment], index=None, header=None, sep=' ')
+        #print(df[['mutant', experiment]])
+        print("The single column experimental data file was produced successfully!")
+
+
 def riesselmanApp(args):
 
     # riesselman_parser = argparse.ArgumentParser(description=\
@@ -100,12 +315,20 @@ def riesselmanApp(args):
 
     
 
-    if(args.otype == 'dat'):
+    if((args.otype == 'singleline') or (args.otype == 'dat')):
         # Read the experimental DMS map    
-        experimental2dat(args.dataset, experiment=args.experiment, \
-                                        outputcsv=args.output+".csv", \
+        experimental2singlelineV2(args.dataset, shift=args.shift, \
+                                        experiment=args.experiment, \
+                                        output=args.output+".csv", \
                                         debug=False, \
-                                        datasource="riesselman")
+                                        datasource=args.source)
+    elif(args.otype == 'mut'):
+        # Read the experimental DMS map    
+        experimental2mutfileV2(args.dataset, shift=args.shift, \
+                                        experiment=args.experiment, \
+                                        output=args.output+".mut", \
+                                        debug=False, \
+                                        datasource=args.source)
 
     else:
         # Read the experimental DMS map

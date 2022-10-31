@@ -133,13 +133,13 @@ def main():
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
     compare_parser.add_argument('--itype', dest='itype', type=str, \
-        help='gemme, rhapsody, foldx or evmutation. Default is gemme.', \
+        help='gemme, rhapsody, foldx, evmutation or singleline. Default is gemme.', \
         required=False, default='gemme')
     compare_parser.add_argument('-j', '--inputfile2', dest='inputfile2', type=str, \
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
     compare_parser.add_argument('--jtype', dest='jtype', type=str, \
-        help='gemme, rhapsody, foldx or evmutation. Default is gemme.', \
+        help='gemme, rhapsody, foldx, evmutation or singleline. Default is gemme.', \
         required=False, default='gemme')
     compare_parser.add_argument('-m', '--metric', dest='metric', type=str, \
         help='Comparison metric.\n It can be spearman or pearson. Default is spearman', \
@@ -204,6 +204,10 @@ def main():
         help='One of the input sequence file in fasta format', \
         required=False, default=None)
 
+    riesselman_parser.add_argument('--source', dest='source', type=str, \
+        help='Dataset source. It has two options: riesselman or proteingym. Default value is proteingym',
+        required=False, default='proteingym')
+
     riesselman_parser.add_argument('-m', '--metric', dest='metric', type=str, \
         help='Comparison metric.\n It can be spearman or pearson. Default is spearman', \
         required=False, default="spearman")
@@ -214,6 +218,9 @@ def main():
     riesselman_parser.add_argument('--otype', dest='otype', type=str, \
         help='gemme or dat (each mutation in a single line, separated by single space). Default is gemme.', \
         required=False, default='gemme')
+    riesselman_parser.add_argument('--shift', dest='shift', type=int, \
+        help='An integer indicating the amount of the shift for the mutation file.',
+        required=False, default=None)
 
     args = main_parser.parse_args()
 

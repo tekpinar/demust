@@ -34,6 +34,37 @@ def compareMapsSpearman(scanningMatrix1, scanningMatrix2):
     correlation, pvalue = stats.spearmanr(scanningMatrix1.flatten(), scanningMatrix2.flatten())
     return(correlation, pvalue)
 
+def innerLoopV4(allExpTypedList, allCompTypedList, debug):
+    """
+        This is my inner loop for numba. 
+        This function works on the assumption that for each 
+        experimental value, there is a non-nan (float) value
+        and line number for both of them are same. 
+        I had to do this assumption. Otherwise, computation
+        of Spearman correlation for multiple mutations can become
+        a pain in the ass. 
+    """
+    dataSet1 = []
+    dataSet2 = []
+    # allExpTypedList = List()
+    # allCompTypedList = List()
+    # [allExpTypedList.append(x) for x in allExpLines]
+    # [allCompTypedList.append(x) for x in allCompLines]
+    i = 0
+    for i in range (len(allExpTypedList)):
+        mutationE = allExpTypedList[i].split()[0]
+        mutationC = allCompTypedList[i].split()[0]
+
+        if(mutationE == mutationC) and (allCompTypedList[i].split()[1] != 'NA'):
+            # if(debug):
+            #     print(mutationE, line.split()[1], compline.split()[1])
+            dataSet1.append((allExpTypedList[i].split()[1]))
+            dataSet2.append((allCompTypedList[i].split()[1]))
+        if(i%1000==0):
+            print(i)
+
+    return dataSet1, dataSet2
+
 def compareApp(args):
     if (args.inputfile1 == None or args.inputfile2 == None):
         print('Usage: demust compare [-h] [-i INPUTFILE1] [--itype GEMME] [-j INPUTFILE2] [--jtype GEMME]')
@@ -66,20 +97,26 @@ def compareApp(args):
         if(debug):
             print(allCompLines)
 
-        dataSet1 = []
-        dataSet2 = []
-        for line in allExpLines:
-            mutationE = line.split()[0]
-            for compline in allCompLines:
-                mutationC = compline.split()[0]
-                if(mutationE == mutationC):
-                    if(1):
-                        print(mutationE, line.split()[1], compline.split()[1])
-                    dataSet1.append(float(line.split()[1]))
-                    dataSet2.append(float(compline.split()[1]))
+        # allExpTypedList = List()
+        # allCompTypedList = List()
+        # [allExpTypedList.append(x) for x in allExpLines]
+        # [allCompTypedList.append(x) for x in allCompLines]  
+        #dataSet1, dataSet2 = innerLoop(allExpTypedList, allCompTypedList, debug=True)
+        dataSet1, dataSet2 = innerLoopV4(allExpLines, allCompLines, debug=True)
+        #dataSet1, dataSet2 = innerLoopV2(allExpTypedList, allCompTypedList, debug=True)
         
-        dataSet1 = np.array(dataSet1)
-        dataSet2 = np.array(dataSet2)
+        # for line in allExpLines:
+        #     mutationE = line.split()[0]
+        #     for compline in allCompLines:
+        #         mutationC = compline.split()[0]
+        #         if(mutationE == mutationC) and (compline.split()[1] != 'NA'):
+        #             if(debug):
+        #                 print(mutationE, line.split()[1], compline.split()[1])
+        #             dataSet1.append(float(line.split()[1]))
+        #             dataSet2.append(float(compline.split()[1]))
+        
+        dataSet1 = np.array(dataSet1, dtype=float)
+        dataSet2 = np.array(dataSet2, dtype=float)
     else:
         print("@> ERROR: Unknown --itype or --jtype specified.")
         print("@>        It can be gemme or singleline!")
@@ -87,4 +124,4 @@ def compareApp(args):
     if(args.metric.lower() == 'spearman'):
         #if((args.itype == "gemme") and (args.jtype == "gemme")):
         correlation, pvalue = compareMapsSpearman(dataSet1, dataSet2)
-        print("\nSpearman comparison of {} and {}: correlation={:.3f} - pvalue={:.3E}\n".format(args.inputfile1, args.inputfile2, correlation, pvalue))
+        print("\nSpearman comparison of {} and {}: correlation={:.3f} ; pvalue={:.3E}\n".format(args.inputfile1, args.inputfile2, correlation, pvalue))
