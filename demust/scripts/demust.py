@@ -96,6 +96,10 @@ def main():
     maps_parser.add_argument('--ranknorm', dest='ranknorm', type=bool, \
         help='A True or False value to apply rank normalization to data matrix',
         required=False, default=False)
+    
+    maps_parser.add_argument('--iscolorbaron', dest='iscolorbaron', type=bool, \
+        help='A True or False value to put color bar on the map or not. Default is False.',
+        required=False, default=False)
 
     maps_parser.add_argument('-s', '--sequence', dest='sequence', type=str, \
         help='Input sequence file in fasta format', \

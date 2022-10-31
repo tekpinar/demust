@@ -177,7 +177,8 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     if(isColorBarOn):
         from mpl_toolkits.axes_grid1 import make_axes_locatable
         divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="1%", pad=0.2)
+        cax = divider.append_axes("right", size=fig_width/nres_shown, pad=0.2)
+        # plt.clim([-10.0, 2.0])
         plt.colorbar(img, cax=cax)
 
     plt.tight_layout()
@@ -700,7 +701,8 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
     if(isColorBarOn):
         from mpl_toolkits.axes_grid1 import make_axes_locatable
         divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="1%", pad=0.2)
+        cax = divider.append_axes("right", size=fig_width/nres_shown, pad=0.2)
+        # plt.clim([-10.0, 2.0])
         plt.colorbar(img, cax=cax)
 
     plt.tight_layout()
