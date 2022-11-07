@@ -115,7 +115,7 @@ def main():
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
     plots_parser.add_argument('-d', '--datatype', dest='datatype', type=str, \
-        help='gemme, rhapsody, foldx, evmutation, riesselman, jet or pdb.', \
+        help='gemme, rhapsody, foldx, evmutation, riesselman, , fasta, jet or pdb.', \
         required=False, default='gemme')
     plots_parser.add_argument('-b', '--beginning', dest='beginning', type=int, \
         help='An integer to indicate the first residue index.',

@@ -3,6 +3,7 @@ import sys
 from scipy import stats
 from demust.io import *
 import numpy as np
+import matplotlib.pyplot as plt
 
 def compareMapsSpearman(scanningMatrix1, scanningMatrix2):
     """
@@ -124,4 +125,10 @@ def compareApp(args):
     if(args.metric.lower() == 'spearman'):
         #if((args.itype == "gemme") and (args.jtype == "gemme")):
         correlation, pvalue = compareMapsSpearman(dataSet1, dataSet2)
+        fig = plt.figure()
+        plt.scatter(dataSet1, dataSet2)
+        plt.xlabel("DMS Score")
+        plt.ylabel("GEMME Score")
+        plt.savefig("spearman2d.png")
+
         print("\nSpearman comparison of {} and {}: correlation={:.3f} ; pvalue={:.3E}\n".format(args.inputfile1, args.inputfile2, correlation, pvalue))

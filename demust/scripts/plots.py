@@ -4,6 +4,7 @@ import argparse
 from scipy.stats import rankdata
 import pandas as pd
 import prody
+import numpy as np
 import sys
 
 # def getMinMaxData(scanningMatrix, type, outfile, printDetails=False):
@@ -57,7 +58,7 @@ def plot1DHeatMap(dataArray, outFile, beg, end, \
                 colorMap = 'Reds', \
                 offSet=0, pixelType='square',
                 sequence=None,\
-                interactive=True):
+                interactive=True, isColorBarOn=False):
     """
         A function to plot deep mutational scanning matrices. 
   
@@ -172,12 +173,12 @@ def plot1DHeatMap(dataArray, outFile, beg, end, \
     
     #To make the colors consistent if there are submatrices.
     #plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
-
-    # if(isColorBarOn):
-    #     from mpl_toolkits.axes_grid1 import make_axes_locatable
-    #     divider = make_axes_locatable(ax)
-    #     cax = divider.append_axes("right", size="1%", pad=0.2)
-    #     plt.colorbar(img, cax=cax)
+    if(isColorBarOn):
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size=fig_width/nres_shown, pad=0.2)
+        plt.clim([0.0, 1.0])
+        plt.colorbar(img, cax=cax)
 
     plt.tight_layout()
     plt.savefig(outFile+".png")
@@ -185,6 +186,8 @@ def plot1DHeatMap(dataArray, outFile, beg, end, \
         plt.show()
     
     plt.close()
+
+
 def option6(a, order='descending'):
     b = -a if order=='descending' else a        
     idx = b.argsort(0,'stable')
@@ -315,6 +318,26 @@ def plotsApp(args):
     elif (args.datatype.lower()=='pdb'):
         performDSSP(args.inputfile, parseall=False, stderr=True) 
         structure = parsePDB(args.inputfile)
+
+    elif (args.datatype.lower()=='fasta'):
+        from Bio import AlignIO
+        dataArray = []
+        alignment = AlignIO.read(args.inputfile, "fasta")
+        proteinSize = (len(alignment[0].seq))
+        numberOfRows = (len(alignment))
+        align_array = np.array([list(rec) for rec in alignment], np.unicode_).transpose()
+
+        for i in range(0, proteinSize):
+            #print(i)
+            gapPerColumnCount=list(align_array[i]).count("-")
+            dataArray.append(1.0 - (gapPerColumnCount/float(numberOfRows)))
+
+        plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+                    colorMap = 'Greys', \
+                    offSet=0, pixelType='square',\
+                    interactive=False, isColorBarOn=True)
+        averageReliability = np.sum(dataArray)/len(dataArray)
+        print("Average Reliability Score={:.2f}".format(averageReliability))
 
     else:
         print("ERROR: Unknown data type: {}.".format(args.datatype))
