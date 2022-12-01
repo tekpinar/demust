@@ -5,6 +5,7 @@ from demust.scripts.maps import mapsApp
 from demust.scripts.plots import plotsApp
 from demust.scripts.compare import compareApp
 from demust.scripts.convert import convertApp
+from demust.scripts.extract import extractApp
 from demust.scripts.removegaps import removeGapsApp
 from demust.scripts.riesselman import riesselmanApp
 
@@ -17,17 +18,19 @@ def usage_main():
     print("""
 Example usage:
 demust -h
-Demust contains five apps:
+Demust contains six apps:
  - maps
  - plots
  - compare
  - convert
+ - extract
  - removegaps
 You can get more information about each individual app as follows:
 demust maps -h
 demust plots -h
 demust compare -h
 demust convert -h
+demust extract -h
 demust removegaps -h
 """)
 
@@ -40,7 +43,7 @@ def main():
 | demust       :  A Python toolkit to modify, visualize and analyze deep mutational scanning (DMS)    |                                
 |                 data of proteins.                                                                   |
 | Copyright   (C) Mustafa Tekpinar, 2022                                                              |
-| Address      :  UMR 7238 CNRS - LCQB, Sorbonne Université, 75005 Paris, France                      |          
+| Address      :  UMR 7238 CNRS - LCQB, Sorbonne University, 75005 Paris, France                      |          
 | Email        :  tekpinar@buffalo.edu                                                                |
 | Licence      :  GNU LGPL V3                                                                         |
 |                                                                                                     |
@@ -168,10 +171,10 @@ def main():
         required=True, default=None)
     convert_parser.add_argument('--itype', dest='itype', type=str, \
         help='gemme, rhapsody, foldx or evmutation. Default is gemme.', \
-        required=False, default='foldx')
+        required=False, default='gemme')
     convert_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
-        help='Default is gemme', \
-        required=True, default='output.txt')
+        help='Default is output.txt', \
+        required=False, default='output.txt')
     convert_parser.add_argument('--otype', dest='otype', type=str, \
         help='gemme or dms (standard format). Default is gemme.', \
         required=False, default='gemme')
@@ -235,6 +238,31 @@ def main():
         help='An integer indicating the amount of the shift for the mutation file.',
         required=False, default=None)
 
+        #extract script argument parsing
+    extract_parser = subparsers.add_parser('extract')
+    extract_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
+        help='One of the output files of gemme, gemme_singleline', \
+        required=True, default=None)
+    extract_parser.add_argument('--itype', dest='itype', type=str, \
+        help='gemme, gemme_singleline. Default is gemme.', \
+        required=False, default='gemme')
+    extract_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
+        help='Default is output.txt', \
+        required=False, default='output.txt')
+    extract_parser.add_argument('--otype', dest='otype', type=str, \
+        help='average or mutA (which means all alanine mutations). Default is average.', \
+        required=False, default='average')
+    # extract_parser.add_argument('--aaorder', dest='aaorder', type=str, \
+    #     help='Amino acid order as a single string. Default is alphabetical: \"ACDEFGHIKLMNPQRSTVWY\"', \
+    #     required=False, default='ACDEFGHIKLMNPQRSTVWY')
+    # extract_parser.add_argument('-f', '--fastafile', dest='fastafile', type=str, \
+    #     help='A fasta file of a single gene to deduce amino acid order of the reference sequence.', \
+    #     required=False, default=None)
+    # extract_parser.add_argument('-b', '--beginning', dest='beginning', type=int, \
+    #     help='An integer indicating the amount to add to the first residue index (1)."+\
+    #         " If not specified, nothing(0) will be added.',
+    #     required=False, default=0)
+
     args = main_parser.parse_args()
 
     if args.command == "maps":
@@ -245,6 +273,8 @@ def main():
        compareApp(args)
     elif args.command == "convert":
        convertApp(args)
+    elif args.command == "extract":
+       extractApp(args)
     elif args.command == "removegaps":
        removeGapsApp(args)
     elif args.command == "riesselman":
