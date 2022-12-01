@@ -196,6 +196,21 @@ def option6(a, order='descending'):
     np.put_along_axis(out, idx, np.arange(1,n+1), axis=0)
     return np.where(np.isnan(a), np.nan, out)
 
+def calculateReliabilityScore(inputfile):
+    from Bio import AlignIO
+    dataArray = []
+    alignment = AlignIO.read(inputfile, "fasta")
+    proteinSize = (len(alignment[0].seq))
+    numberOfRows = (len(alignment))
+    align_array = np.array([list(rec) for rec in alignment], np.unicode_).transpose()
+
+    for i in range(0, proteinSize):
+        #print(i)
+        gapPerColumnCount=list(align_array[i]).count("-")
+        dataArray.append(1.0 - (gapPerColumnCount/float(numberOfRows)))
+    
+    return dataArray
+
 def plotsApp(args):
     # if args.inputfile == None:
     #     print('Usage: python demust.py [-h] [-i INPUTFILE] [-d GEMME]')
@@ -283,7 +298,7 @@ def plotsApp(args):
                 plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
                             colorMap = 'Greens', \
                             offSet=0, pixelType='square',\
-                            interactive=False)
+                            interactive=False, isColorBarOn=True)
             else:
                 print("ERROR: The file does not contain a column called 'trace'!")
                 sys.exit(-1)
@@ -295,7 +310,7 @@ def plotsApp(args):
                 plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
                             colorMap = 'Blues', \
                             offSet=0, pixelType='square',\
-                            interactive=False)
+                            interactive=False, isColorBarOn=True)
             else:
                 print("ERROR: The file does not contain a column called 'pc'!")
                 sys.exit(-1)
@@ -307,7 +322,7 @@ def plotsApp(args):
                 plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
                             colorMap = 'Oranges', \
                             offSet=0, pixelType='square',\
-                            interactive=False)
+                            interactive=False, isColorBarOn=True)
             else:
                 print("ERROR: The file does not contain a column called 'cv'!")
                 sys.exit(-1)
@@ -329,13 +344,47 @@ def plotsApp(args):
 
         for i in range(0, proteinSize):
             #print(i)
+            #Reliability calculation
             gapPerColumnCount=list(align_array[i]).count("-")
             dataArray.append(1.0 - (gapPerColumnCount/float(numberOfRows)))
+        
+        if(args.end == None):
+            args.end = len(dataArray)
+            print("Length of data array"+str(args.end))
+        if(args.paginate.lower()=="true"):
+            sequenceLength = (args.end - args.beginning - 1) # -1 is for starting the count from 0. 
 
-        plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+            rowLength = 100
+            numberOfImageChunks = int(int(sequenceLength)/int(rowLength))
+            
+            for i in range(numberOfImageChunks):
+                # plotGEMMEmatrix(gemmeData, args.outputfile+"_part_"+str(i+1), \
+                #     i*rowLength + args.beginning, \
+                #     (i+1)*rowLength + args.beginning -1,\
+                #     colorMap=args.colormap, offSet=i*rowLength + args.offset, pixelType='square',\
+                #     aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron)
+                plot1DHeatMap(dataArray, args.outputfile+"_part_"+str(i+1), beg=i*rowLength + args.beginning, \
+                    end=(i+1)*rowLength + args.beginning -1, \
                     colorMap = 'Greys', \
-                    offSet=0, pixelType='square',\
+                    offSet=i*rowLength + args.offset, pixelType='square',\
                     interactive=False, isColorBarOn=True)
+            if(sequenceLength%rowLength != 0):
+                # plotGEMMEmatrix(gemmeData, args.outputfile+"_part_"+str(i+2), \
+                #     (i+1)*rowLength + args.beginning, \
+                #     args.end,\
+                #     colorMap=args.colormap, offSet=(i+1)*rowLength + args.offset, pixelType='square',\
+                #     aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron)
+                plot1DHeatMap(dataArray, args.outputfile+"_part_"+str(i+2), beg=(i+1)*rowLength + args.beginning, \
+                                end=args.end, \
+                                colorMap = 'Greys', \
+                                offSet=(i+1)*rowLength + args.offset, pixelType='square',\
+                                interactive=False, isColorBarOn=True)
+        else:
+            plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+                        colorMap = 'Greys', \
+                        offSet=0, pixelType='square',\
+                        interactive=False, isColorBarOn=True)
+        
         averageReliability = np.sum(dataArray)/len(dataArray)
         print("Average Reliability Score={:.2f}".format(averageReliability))
 

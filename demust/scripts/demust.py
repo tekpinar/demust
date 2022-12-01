@@ -129,6 +129,12 @@ def main():
     plots_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
         help='Name of the output file.', \
         required=False, default='output.txt')
+    plots_parser.add_argument('--paginate', dest='paginate', type=str, \
+        help='A true or false value',
+        required=False, default='false')
+    plots_parser.add_argument('--offset', dest='offset', type=int, \
+        help='An integer value to offset the xlabels for incomplete sequences',
+        required=False, default=0) 
 
 
     #compare script argument parsing
@@ -151,6 +157,9 @@ def main():
     compare_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
         help='Name of the output file. Default is output.txt', \
         required=False, default='output.txt')
+    compare_parser.add_argument('--msafile', dest='msafile', type=str, \
+        help='An aligned multiple sequence alignment file in fasta format.', \
+        required=False, default=None)
 
     #convert script argument parsing
     convert_parser = subparsers.add_parser('convert')

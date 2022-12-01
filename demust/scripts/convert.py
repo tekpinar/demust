@@ -4,6 +4,7 @@
     alphabetical one-letter amino acid (aa) order, to another aa order. 
 """
 import argparse
+import sys
 from demust.io import *
 from Bio import SeqIO
 #import pandas as pd
