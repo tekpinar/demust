@@ -7,7 +7,8 @@ import random
 def randsubset(inputMSAfile, outputMSAfile, numSel):
     """
         Select numSel sequences randomly from an inputMSAfile
-        and write them to outputMSAfile. 
+        in fasta format and write them to outputMSAfile in fasta
+        format. 
     """
 
     if(numSel == None):
@@ -20,13 +21,19 @@ def randsubset(inputMSAfile, outputMSAfile, numSel):
         sys.exit(-1)
     else:
         N = int(numSel)
-        print("Selecting "+str(N)+" to sequences from the input MSA!")\
-            
 
+    allRecords = list(SeqIO.parse(inputMSAfile, "fasta"))
 
-    allRecords = SeqIO.parse(inputMSAfile, "fasta")
-
-    totalSeqs = 500
+    totalSeqs = len(allRecords)
+    if(totalSeqs > N):
+        print("There are "+str(totalSeqs)+" sequences in the input MSA!")
+        print("Selecting "+str(N)+" sequences from the input MSA!")
+    else:
+        print("ERROR: There are "+str(totalSeqs)+" sequences in the input MSA")
+        print("       but you are trying to select " + str(N) + " sequences!!")
+        print("Please make numsel smaller than "+str(totalSeqs)+"!")
+        sys.exit(-1)
+        
     myRandList = random.sample(range(0, totalSeqs), numSel)
 
     outfile = outputMSAfile

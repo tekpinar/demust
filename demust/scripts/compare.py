@@ -190,7 +190,7 @@ def innerLoopV5(allExpTypedList, allCompTypedList, msafile=None, writeOutput=Tru
 
     return dataSet1, dataSet2    
 
-def innerLoopV6(allExpTypedList, allCompTypedList, msafile=None, writeOutput=True, outfile="exp-vs-comp.txt"):
+def innerLoopV6(allExpTypedList, allCompTypedList, msafile=None, ssfile=None, writeOutput=True, outfile="exp-vs-comp.txt"):
     """
         This is my inner loop for numba. 
         This function works on the assumption that for each 
@@ -202,6 +202,15 @@ def innerLoopV6(allExpTypedList, allCompTypedList, msafile=None, writeOutput=Tru
         The difference of this function to innerLoopV5:
         It calculates mutational state by removing the number of gaps from the 
         columns.
+
+        ssfile = Secondary structure file
+                 It is something like this:
+                 1,H
+                 2,E
+                 3,C
+                 ...
+                 159,E
+        The letters are dssp secondary structure letters. 
     """
     dataSet1 = []
     dataSet2 = []
@@ -259,6 +268,41 @@ def innerLoopV6(allExpTypedList, allCompTypedList, msafile=None, writeOutput=Tru
                     spearmanFile.write("{} {:.4f} {:.4f} {:.2f} {:.2f}\n".format(mutationE, \
                                         float(allExpTypedList[i].split()[1]), 
                                         float(allCompTypedList[i].split()[1]), tempReliability, tempMutationalState))
+                # ssfile is secondary structure file.
+                elif(ssfile!=None):
+                    #print("We have a secondary structure file!")
+                    #Read secondary structure file
+                    mydic = {}
+                    with open(ssfile) as f:
+                        for line in f:
+                            (key, val) = line.split(",")
+                            mydic[int(key)] = val
+                    multipleMutation = mutationE.split(":")
+                    #print(mydic)
+                    secStructureState=""
+                    for item in multipleMutation:
+                        mutPosition=int(item[1:-1])
+
+                        #print(mutPosition)
+                        #Add secondary structure information even for multiple point mutations
+                        #print(mydic[mutPosition])
+                        secStructureState +=mydic[mutPosition].strip()
+                    #     gapPerColumnCount=list(align_array[mutPosition]).count("-")
+                    #     valueR = (1.0 - (gapPerColumnCount/float(numberOfRows)))
+                    #     tempReliability = tempReliability + valueR
+
+                    #     valueMS = calcMutationalStateV2(align_array, item)
+                    #     tempMutationalState = tempMutationalState + valueMS
+
+
+                    # tempReliability = tempReliability / len(multipleMutation)
+                    # tempMutationalState = tempMutationalState / len(multipleMutation)
+
+
+                    spearmanFile.write("{} {:.4f} {:.4f} {}\n".format(mutationE, \
+                                        float(allExpTypedList[i].split()[1]), 
+                                        float(allCompTypedList[i].split()[1]), secStructureState))
+                    
                 else:
                     spearmanFile.write("{} {:.4f} {:.4f}\n".format(mutationE, \
                                         float(allExpTypedList[i].split()[1]), 
@@ -284,7 +328,7 @@ def compareApp(args):
     
         
 
-    debug = False
+    debug = True
     print("\nRunning 'demust compare' app...\n")
     if((args.itype == "gemme") and (args.jtype == "gemme")):
         dataSet1 = parseGEMMEoutput(args.inputfile1, verbose=False)
@@ -310,7 +354,8 @@ def compareApp(args):
         #dataSet1, dataSet2 = innerLoop(allExpTypedList, allCompTypedList, debug=True)
         #dataSet1, dataSet2 = innerLoopV4(allExpLines, allCompLines, writeOutput=True, outfile="spearman.dat")
         #dataSet1, dataSet2 = innerLoopV5(allExpLines, allCompLines, msafile=args.msafile, writeOutput=True, outfile="exp-vs-comp.txt")
-        dataSet1, dataSet2 = innerLoopV6(allExpLines, allCompLines, msafile=args.msafile, writeOutput=True, outfile="exp-vs-comp.txt")
+        dataSet1, dataSet2 = innerLoopV6(allExpLines, allCompLines, msafile=args.msafile, \
+                                        ssfile=args.ssfile, writeOutput=True, outfile="exp-vs-comp.txt")
         #dataSet1, dataSet2 = innerLoopV2(allExpTypedList, allCompTypedList, debug=True)
         
         # for line in allExpLines:

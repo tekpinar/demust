@@ -8,7 +8,7 @@ from demust.scripts.convert import convertApp
 from demust.scripts.extract import extractApp
 from demust.scripts.removegaps import removeGapsApp
 from demust.scripts.riesselman import riesselmanApp
-
+from demust.scripts.randsubset import randsubsetApp
 #TODO:
 
 def usage_main():
@@ -18,13 +18,14 @@ def usage_main():
     print("""
 Example usage:
 demust -h
-Demust contains six apps:
+Demust contains seven apps:
  - maps
  - plots
  - compare
  - convert
  - extract
  - removegaps
+ - randsubset
 You can get more information about each individual app as follows:
 demust maps -h
 demust plots -h
@@ -32,6 +33,7 @@ demust compare -h
 demust convert -h
 demust extract -h
 demust removegaps -h
+demust randsubset -h
 """)
 
 
@@ -163,6 +165,9 @@ def main():
     compare_parser.add_argument('--msafile', dest='msafile', type=str, \
         help='An aligned multiple sequence alignment file in fasta format.', \
         required=False, default=None)
+    compare_parser.add_argument('--ssfile', dest='ssfile', type=str, \
+        help='An secondary structure file in plain text format.', \
+        required=False, default=None)
 
     #convert script argument parsing
     convert_parser = subparsers.add_parser('convert')
@@ -197,7 +202,7 @@ def main():
         required=True, default=None)
 
     removegaps_parser.add_argument('-o', '--outputungappedmsa', dest='outputungappedmsa', type=str, \
-        help="Name of the output gapped Multiple Sequence Alignment file in fasta format. Default is outputungappedmsa.fasta",
+        help="Name of the output ungapped Multiple Sequence Alignment file in fasta format. Default is outputungappedmsa.fasta",
         required=False, default="outputungappedmsa.fasta")
 
     # riesselman script argument parsing
@@ -263,6 +268,24 @@ def main():
     #         " If not specified, nothing(0) will be added.',
     #     required=False, default=0)
 
+    #randsubset script argument parser
+    randsubset_parser = subparsers.add_parser('randsubset', \
+        description="Selects 'numsel' sequences randomly from an input MSA and writes them to an outputmsa.fasta file!")
+
+    randsubset_parser.add_argument('-i', '--inputmsa', dest='inputmsa', type=str, \
+        help="Name of the input Multiple Sequence Alignment file in fasta format.",
+        required=True, default=None)
+
+    randsubset_parser.add_argument('-o', '--outputmsa', dest='outputmsa', type=str, \
+        help="Name of the output Multiple Sequence Alignment file in fasta format. \
+              Default is outputmsa.fasta",
+        required=False, default="outputmsa.fasta")
+
+    randsubset_parser.add_argument('-n', '--numsel', dest='numsel', type=int, \
+        help='An integer number showing number of randomly selected sequences from the input MSA.',
+        required=True, default=None)
+
+
     args = main_parser.parse_args()
 
     if args.command == "maps":
@@ -279,6 +302,8 @@ def main():
        removeGapsApp(args)
     elif args.command == "riesselman":
        riesselmanApp(args)
+    elif args.command == "randsubset":
+       randsubsetApp(args)
     elif args.command == "-h" or args.command == "--help":
         usage_main()
     else:
