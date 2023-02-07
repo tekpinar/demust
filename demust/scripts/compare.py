@@ -237,7 +237,7 @@ def innerLoopV6(allExpTypedList, allCompTypedList, msafile=None, ssfile=None, wr
         mutationE = allExpTypedList[i].split()[0]
         mutationC = allCompTypedList[i].split()[0]
 
-        if(mutationE == mutationC) and (allCompTypedList[i].split()[1] != 'NA'):
+        if(mutationE == mutationC) and (allCompTypedList[i].split()[1] != 'NA' and (allCompTypedList[i].split()[1] != 'NaN')):
             if(False):
                 print(mutationE, (allExpTypedList[i].split()[1]), (allCompTypedList[i].split()[1]))
             dataSet1.append((allExpTypedList[i].split()[1]))

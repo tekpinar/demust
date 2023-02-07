@@ -19,7 +19,7 @@ def getGEMMEmatrixRow(inputfile, mutationsTo="a"):
         GEMME and extracts all mutations to a sinle residue such as alanine.
     """
     import pandas as pd
-    print("Here I am!")
+    #print("Here I am!")
     df = pd.read_table(inputfile, sep=" ")
     df_transposed = df.T
     print(df_transposed[mutationsTo])
