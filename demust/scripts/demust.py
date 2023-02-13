@@ -255,7 +255,9 @@ def main():
         help='Default is output.txt', \
         required=False, default='output.txt')
     extract_parser.add_argument('--otype', dest='otype', type=str, \
-        help='average or mutA (which means all alanine mutations). Default is average.', \
+        help='average or mutA (which means all alanine mutations). '+
+            +'You can also extract result of a single mutation (such as M694V)'+\
+            'from a file in singleline format. Default is average.', \
         required=False, default='average')
     # extract_parser.add_argument('--aaorder', dest='aaorder', type=str, \
     #     help='Amino acid order as a single string. Default is alphabetical: \"ACDEFGHIKLMNPQRSTVWY\"', \

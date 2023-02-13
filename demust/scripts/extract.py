@@ -86,7 +86,7 @@ def getSingleLineAverages(inputfile, outputfile):
         print("@> ERROR: Lenghts of the arrays do not match!")
         sys.exit(-1)
 
-def getSingleLineSingleMutations(inputfile, outputfile, mutationsTo="a"):
+def getSingleLineSingleAminoAcidType(inputfile, outputfile, mutationsTo="a"):
     """
         This method gets a mutation result for a single amino acid in singleline format.
         It is useful to obtain results like alanine scanning experiments from a mixed dataset. 
@@ -135,6 +135,65 @@ def getSingleLineSingleMutations(inputfile, outputfile, mutationsTo="a"):
         print("@> ERROR: Lenghts of the arrays do not match!")
         sys.exit(-1)
 
+def getSingleLineSingleMutation(inputfile, outputfile, mutationTo):
+    """
+        This method gets a mutation result for a single amino acid from a singleline format file.
+        It is useful to obtain from the entire output when you are only interested in a single 
+        mutation like M694V. 
+    """
+    #Read the inputfile
+    singleFile = open(inputfile, "r")
+    allLines = singleFile.readlines()
+    singleFile.close()
+
+    mutationsList = []
+    for line in allLines:
+        data = line.split()
+        if(":" in data[0]) or ("," in data[0]):
+            continue
+        else:
+            mutationsList.append(data[0][0:-1])
+
+    # insert the list to the set
+    listSet = sorted(set(mutationsList), key=mutationsList.index)
+    # convert the set to the list
+    uniqueMutations = (list(listSet))
+
+    #print(uniqueMutations)
+
+    mutationList = []
+    residueIDList = []
+
+    for line in allLines:
+        data = line.split()
+        if(":" in data[0]) or ("," in data[0]):
+            continue
+        else:
+            mutationToV1="X"+mutationTo[1:]
+            mutationToV2="V"+mutationTo[1:]
+            #print(mutationTo, mutationToV1, mutationToV2, data[0])
+            if ((mutationTo.strip().lower() == (data[0]).strip().lower()) or \
+                (mutationToV1.strip().lower() == (data[0]).strip().lower()) or \
+                (mutationToV2.strip().lower() == (data[0]).strip().lower())):
+                print("Score for mutation {:}= {:.3f}".format(mutationTo, float(data[1])))
+            # else:
+            #     print("The mutation you requested is not in the output file!")
+                # mutationList.append(float(data[1]))
+                # residueIDList.append(int(data[0][1:-1]))
+
+    #return(mutationList)
+
+    # if(len(mutationList)==len(residueIDList)):
+    #     with open(outputfile, 'w', encoding='utf-8') as datafile:
+    #         for i in range (len(mutationList)):
+    #             datafile.write("{} {:.4f}\n".format(residueIDList[i], mutationList[i]))
+
+    #         print("@> 'demust extract' wrote the data to {} succesfully!".format(outputfile))
+    # else:
+    #     print("@> ERROR: Lenghts of the arrays do not match!")
+    #     sys.exit(-1)
+
+
 def extractApp(args):
     if (args.inputfile == None):
         print('Usage: demust extract [-h] [-i INPUTFILE] [--itype GEMME] [-o OUTPUTFILE] [--otype GEMME]')
@@ -167,12 +226,14 @@ def extractApp(args):
         if (args.otype.lower()=='average'):
             getSingleLineAverages(args.inputfile, args.outputfile)
         elif (args.otype.lower() in probableMutationsList):
-            getSingleLineSingleMutations(args.inputfile, args.outputfile, mutationsTo=args.otype.lower()[-1])
+            getSingleLineSingleAminoAcidType(args.inputfile, args.outputfile, mutationsTo=args.otype.lower()[-1])
             # with open(args.outputfile, 'w', encoding='utf-8') as datafile:
             #     for i in range (len(dataArray)):
             #         datafile.write("{} {}\n".format(i+1, dataArray[i]))
 
             #     print("@> 'demust extract' wrote the data to {} succesfully!".format(args.outputfile))
+        elif (args.otype.lower()=="singlemutation"):
+            getSingleLineSingleMutation(args.inputfile, args.outputfile, args.outputfile)
     
     else:
         print("@ ERROR: Unknown input type: It can only be gemme or singleline!")
