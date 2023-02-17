@@ -9,6 +9,7 @@ from demust.scripts.extract import extractApp
 from demust.scripts.removegaps import removeGapsApp
 from demust.scripts.riesselman import riesselmanApp
 from demust.scripts.randsubset import randsubsetApp
+from demust.scripts.diffmap import diffmapApp
 #TODO:
 
 def usage_main():
@@ -18,7 +19,7 @@ def usage_main():
     print("""
 Example usage:
 demust -h
-Demust contains seven apps:
+Demust contains following apps:
  - maps
  - plots
  - compare
@@ -26,6 +27,7 @@ Demust contains seven apps:
  - extract
  - removegaps
  - randsubset
+ - diffmap
 You can get more information about each individual app as follows:
 demust maps -h
 demust plots -h
@@ -34,25 +36,24 @@ demust convert -h
 demust extract -h
 demust removegaps -h
 demust randsubset -h
+demust diffmap -h
 """)
 
 
 def main():
 
     print("""
-|-------------------------------------------demust----------------------------------------------------|
-|                                                                                                     |
-| demust       :  A Python toolkit to modify, visualize and analyze deep mutational scanning (DMS)    |                                
-|                 data of proteins.                                                                   |
-| Copyright   (C) Mustafa Tekpinar, 2022                                                              |
-| Address      :  UMR 7238 CNRS - LCQB, Sorbonne University, 75005 Paris, France                      |          
-| Email        :  tekpinar@buffalo.edu                                                                |
-| Licence      :  GNU LGPL V3                                                                         |
-|                                                                                                     |
-| Documentation:                                                                                      |
-| Citation     : .....................................................................................|      
-| Version      : {0}                                                                                |
-|-----------------------------------------------------------------------------------------------------|
+                                                                                             
+| demust       :  A Python toolkit to modify, visualize and analyze deep mutational scanning (DMS)                                    
+|                 data of proteins.                                                                   
+| Copyright   (C) Mustafa Tekpinar, 2022                                                              
+| Address      :  UMR 7238 CNRS - LCQB, Sorbonne University, 75005 Paris, France                                
+| Email        :  tekpinar@buffalo.edu                                                                
+| Licence      :  GNU LGPL V3                                                                                                                                                                 
+| Documentation:                                                                                      
+| Citation     : .............................................     
+| Version      : {0}
+
 """.format(cp_vers))
 
     main_parser = argparse.ArgumentParser(description=\
@@ -60,7 +61,7 @@ def main():
     subparsers = main_parser.add_subparsers(dest='command')
 
     #maps script argument parsing
-    maps_parser  = subparsers.add_parser('maps')
+    maps_parser  = subparsers.add_parser('maps', description="Plots colored DMS maps.")
 
     maps_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
         help='One of the output files of gemme, rhapsody or evmutation', \
@@ -170,7 +171,7 @@ def main():
         required=False, default=None)
 
     #convert script argument parsing
-    convert_parser = subparsers.add_parser('convert')
+    convert_parser = subparsers.add_parser('convert', description="Compare two DMS results and report Spearman correlation.")
     convert_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
@@ -255,8 +256,8 @@ def main():
         help='Default is output.txt', \
         required=False, default='output.txt')
     extract_parser.add_argument('--otype', dest='otype', type=str, \
-        help='average or mutA (which means all alanine mutations). '+
-            +'You can also extract result of a single mutation (such as M694V)'+\
+        help='average or mutA (which means all alanine mutations). '+ \
+            'You can also extract result of a single mutation (such as M694V)'+ \
             'from a file in singleline format. Default is average.', \
         required=False, default='average')
     # extract_parser.add_argument('--aaorder', dest='aaorder', type=str, \
@@ -287,6 +288,63 @@ def main():
         help='An integer number showing number of randomly selected sequences from the input MSA.',
         required=True, default=None)
 
+        #compare script argument parsing
+    diffmap_parser = subparsers.add_parser('diffmap')
+    diffmap_parser.add_argument('-i', '--inputfile1', dest='inputfile1', type=str, \
+        help='One of the output files of gemme, rhapsody or evmutation', \
+        required=True, default=None)
+    diffmap_parser.add_argument('--itype', dest='itype', type=str, \
+        help='gemme, rhapsody, foldx, evmutation or singleline. Default is gemme.', \
+        required=False, default='gemme')
+    diffmap_parser.add_argument('-j', '--inputfile2', dest='inputfile2', type=str, \
+        help='One of the output files of gemme, rhapsody or evmutation', \
+        required=True, default=None)
+    diffmap_parser.add_argument('--jtype', dest='jtype', type=str, \
+        help='gemme, rhapsody, foldx, evmutation or singleline. Default is gemme.', \
+        required=False, default='gemme')
+    diffmap_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
+        help='Name of the output file. Default is output.txt', \
+        required=False, default='output')
+    diffmap_parser.add_argument('--paginate', dest='paginate', type=str, \
+        help='A true or false value',
+        required=False, default='false')
+    
+    diffmap_parser.add_argument('-b', '--beginning', dest='beginning', type=int, \
+        help='An integer to indicate the first residue index.',
+        required=False, default=1)
+
+    diffmap_parser.add_argument('-e', '--end', dest='end', type=int, \
+        help='An integer to indicate the final residue index.',
+        required=False, default=None)
+
+    diffmap_parser.add_argument('--colormap', dest='colormap', type=str, \
+        help='A colormap as defined in matplotlib',
+        required=False, default='coolwarm_r')
+    # diffmap_parser.add_argument('--ranknorm', dest='ranknorm', type=bool, \
+    #     help='A True or False value to apply rank normalization to data matrix',
+    #     required=False, default=False)
+
+    diffmap_parser.add_argument('--iscolorbaron', dest='iscolorbaron', type=bool, \
+        help='A True or False value to put color bar on the map or not. Default is False.',
+        required=False, default=False)
+    
+    diffmap_parser.add_argument('--offset', dest='offset', type=int, \
+        help='An integer value to offset the xlabels for incomplete sequences',
+        required=False, default=0)
+    
+    diffmap_parser.add_argument('-s', '--sequence', dest='sequence', type=str, \
+        help='Input sequence file in fasta format', \
+        required=False, default=None)
+
+    diffmap_parser.add_argument('--aaorder', dest='aaorder', type=str, \
+        help='Amino acid order as a single string. Default is alphabetical: \"ACDEFGHIKLMNPQRSTVWY\"', \
+        required=False, default='ACDEFGHIKLMNPQRSTVWY')
+    # diffmap_parser.add_argument('--msafile', dest='msafile', type=str, \
+    #     help='An aligned multiple sequence alignment file in fasta format.', \
+    #     required=False, default=None)
+    # diffmap_parser.add_argument('--ssfile', dest='ssfile', type=str, \
+    #     help='An secondary structure file in plain text format.', \
+    #     required=False, default=None)
 
     args = main_parser.parse_args()
 
@@ -306,6 +364,8 @@ def main():
        riesselmanApp(args)
     elif args.command == "randsubset":
        randsubsetApp(args)
+    elif args.command == "diffmap":
+       diffmapApp(args)
     elif args.command == "-h" or args.command == "--help":
         usage_main()
     else:
