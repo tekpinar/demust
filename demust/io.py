@@ -164,15 +164,16 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     
     #To make the colors consistent if there are submatrices.
     plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
-
+    #plt.clim([-5.0, 5.0])
     if(sequence!=None):
         mySeqFile = SeqIO.read(sequence, 'fasta')
+        #print(mySeqFile)
         #Convert aaOrder to a list.
         aaOrderList = list(aaOrder)
         for i in range (len(subMatrix[0])):
             j = beg-1+i
             # print(i, aaOrderList.index(sequence[i]))
-            plt.scatter(i, aaOrderList.index(mySeqFile.seq[j]), s=5, c='black', marker='o')
+            plt.scatter(i, aaOrderList.index(mySeqFile.seq[j].upper()), s=5, c='black', marker='o')
     
     if(isColorBarOn):
         from mpl_toolkits.axes_grid1 import make_axes_locatable

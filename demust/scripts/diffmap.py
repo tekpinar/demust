@@ -23,10 +23,10 @@ def diffmapApp(args):
             print("ERROR: Lengths of two datasets are not equal!")
             sys.exit(-1)
 
-        if(args.paginate.lower()=="true"):
+        if(args.paginate!=0):
             sequenceLength = (args.end - args.beginning - 1) # -1 is for starting the count from 0. 
 
-            rowLength = 200
+            rowLength = args.paginate
             numberOfImageChunks = int(int(sequenceLength)/int(rowLength))
             
             for i in range(numberOfImageChunks):

@@ -26,10 +26,10 @@ def mapsApp(args):
                 colorMap=args.colormap, offSet=args.offset, pixelType='square',\
                 aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron)
         else:
-            if(args.paginate.lower()=="true"):
+            if(args.paginate!=0):
                 sequenceLength = (args.end - args.beginning - 1) # -1 is for starting the count from 0. 
 
-                rowLength = 100
+                rowLength = args.paginate
                 numberOfImageChunks = int(int(sequenceLength)/int(rowLength))
                 
                 for i in range(numberOfImageChunks):
@@ -57,10 +57,10 @@ def mapsApp(args):
         if(args.end == None):
             args.end = len(rhapsodyData[0])
 
-        if(args.paginate.lower()=="true"):
+        if(args.paginate!=0):
             sequenceLength = (args.end - args.beginning - 1) # -1 is for starting the count from 0. 
 
-            rowLength = 100
+            rowLength = args.paginate
             numberOfImageChunks = int(int(sequenceLength)/int(rowLength))
             
             for i in range(numberOfImageChunks):
@@ -85,10 +85,10 @@ def mapsApp(args):
         if(args.end == None):
             args.end = len(foldxData[0])
 
-        if(args.paginate.lower()=="true"):
+        if(args.paginate!=0):
             sequenceLength = (args.end - args.beginning - 1) # -1 is for starting the count from 0. 
 
-            rowLength = 100
+            rowLength = args.paginate
             numberOfImageChunks = int(int(sequenceLength)/int(rowLength))
             
             for i in range(numberOfImageChunks):

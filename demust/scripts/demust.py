@@ -83,9 +83,9 @@ def main():
         help='A colormap as defined in matplotlib',
         required=False, default='coolwarm_r')
 
-    maps_parser.add_argument('--paginate', dest='paginate', type=str, \
-        help='A true or false value',
-        required=False, default='false')    
+    maps_parser.add_argument('--paginate', dest='paginate', type=int, \
+        help='An integer value. Default is 0, which means to plot without pagination.',
+        required=False, default=0)    
 
     maps_parser.add_argument('--field', dest='field', type=int, \
         help='An integer value starting from 0 for reading the rhapsody output',
@@ -135,9 +135,10 @@ def main():
     plots_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
         help='Name of the output file.', \
         required=False, default='output.txt')
-    plots_parser.add_argument('--paginate', dest='paginate', type=str, \
-        help='A true or false value',
-        required=False, default='false')
+    plots_parser.add_argument('--paginate', dest='paginate', type=int, \
+        help='An integer value. Default is 0, which means to plot without pagination.',
+        required=False, default=0)    
+
     plots_parser.add_argument('--offset', dest='offset', type=int, \
         help='An integer value to offset the xlabels for incomplete sequences',
         required=False, default=0) 
@@ -305,10 +306,10 @@ def main():
     diffmap_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
         help='Name of the output file. Default is output.txt', \
         required=False, default='output')
-    diffmap_parser.add_argument('--paginate', dest='paginate', type=str, \
-        help='A true or false value',
-        required=False, default='false')
-    
+    diffmap_parser.add_argument('--paginate', dest='paginate', type=int, \
+        help='An integer value. Default is 0, which means to plot without pagination.',
+        required=False, default=0)    
+
     diffmap_parser.add_argument('-b', '--beginning', dest='beginning', type=int, \
         help='An integer to indicate the first residue index.',
         required=False, default=1)
