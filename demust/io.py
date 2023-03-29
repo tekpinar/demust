@@ -1059,7 +1059,7 @@ def writeDMSformat(scanningMatrix, outFile, residueList,
             realResidueList.append(tempString)
     else:
         for i in range(0,len(scanningMatrix[0])):
-            tempString = residueList[i]+str(i+1+beg)
+            tempString = residueList[i].upper()+str(i+1+beg)
             realResidueList.append(tempString)
 
     with open(outFile, 'w') as file:

@@ -10,6 +10,7 @@ from demust.scripts.removegaps import removeGapsApp
 from demust.scripts.riesselman import riesselmanApp
 from demust.scripts.randsubset import randsubsetApp
 from demust.scripts.diffmap import diffmapApp
+from demust.scripts.inputgenerator import inputgeneratorApp
 #TODO:
 
 def usage_main():
@@ -28,6 +29,7 @@ Demust contains following apps:
  - removegaps
  - randsubset
  - diffmap
+ - inputgenerator
 You can get more information about each individual app as follows:
 demust maps -h
 demust plots -h
@@ -37,6 +39,7 @@ demust extract -h
 demust removegaps -h
 demust randsubset -h
 demust diffmap -h
+demust inputgenerator -h
 """)
 
 
@@ -46,7 +49,7 @@ def main():
                                                                                              
 | demust       :  A Python toolkit to modify, visualize and analyze deep mutational scanning (DMS)                                    
 |                 data of proteins.                                                                   
-| Copyright   (C) Mustafa Tekpinar, 2022                                                              
+| Copyright   (C) Mustafa Tekpinar, 2022-2023
 | Address      :  UMR 7238 CNRS - LCQB, Sorbonne University, 75005 Paris, France                                
 | Email        :  tekpinar@buffalo.edu                                                                
 | Licence      :  GNU LGPL V3                                                                                                                                                                 
@@ -57,7 +60,7 @@ def main():
 """.format(cp_vers))
 
     main_parser = argparse.ArgumentParser(description=\
-        "A Python toolkit to modify, visualize and analyze deep mutational scanning (DMS) data of proteins.")
+        "A Python toolkit to prepare, modify, visualize and analyze deep mutational scanning (DMS) data of proteins.")
     subparsers = main_parser.add_subparsers(dest='command')
 
     #maps script argument parsing
@@ -116,7 +119,8 @@ def main():
         required=False, default='ACDEFGHIKLMNPQRSTVWY')
 
     #plots script argument parsing
-    plots_parser = subparsers.add_parser('plots')
+    plots_parser = subparsers.add_parser('plots', \
+        description="Can plot 2D data: 'min or max from DMS maps' or 'trace, pc or cv from JET files.")
     plots_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
@@ -145,7 +149,8 @@ def main():
 
 
     #compare script argument parsing
-    compare_parser = subparsers.add_parser('compare')
+    compare_parser = subparsers.add_parser('compare', \
+        description="Compares two DMS results and reports Spearman correlation.")
     compare_parser.add_argument('-i', '--inputfile1', dest='inputfile1', type=str, \
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
@@ -172,7 +177,7 @@ def main():
         required=False, default=None)
 
     #convert script argument parsing
-    convert_parser = subparsers.add_parser('convert', description="Compare two DMS results and report Spearman correlation.")
+    convert_parser = subparsers.add_parser('convert', description="Converts outputs of various formats.")
     convert_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
@@ -197,7 +202,8 @@ def main():
         required=False, default=0)
 
     #removegaps script argument parser
-    removegaps_parser = subparsers.add_parser('removegaps')
+    removegaps_parser = subparsers.add_parser('removegaps', \
+        description="Remove columns containing gaps in the query sequence.")
 
     removegaps_parser.add_argument('-i', '--inputgappedmsa', dest='inputgappedmsa', type=str, \
         help="Name of the input gapped Multiple Sequence Alignment file in fasta format.",
@@ -246,7 +252,8 @@ def main():
         required=False, default=None)
 
         #extract script argument parsing
-    extract_parser = subparsers.add_parser('extract')
+    extract_parser = subparsers.add_parser('extract', \
+        description="Extracts single point mutation (M212A), average or alanine scanning data from a GEMME output!")
     extract_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
         help='One of the output files of gemme, gemme_singleline', \
         required=True, default=None)
@@ -290,7 +297,7 @@ def main():
         required=True, default=None)
 
         #compare script argument parsing
-    diffmap_parser = subparsers.add_parser('diffmap')
+    diffmap_parser = subparsers.add_parser('diffmap', description="Obtain a difference map between two predictions.")
     diffmap_parser.add_argument('-i', '--inputfile1', dest='inputfile1', type=str, \
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
@@ -347,6 +354,24 @@ def main():
     #     help='An secondary structure file in plain text format.', \
     #     required=False, default=None)
 
+
+    #inputgenerator script argument parser
+    inputgenerator_parser = subparsers.add_parser('inputgenerator', \
+        description="Generates inputs for polyphen2 and (hopefully) VESPA using a single sequence file in fasta format!")
+
+    inputgenerator_parser.add_argument('-i', '--inputsequence', dest='inputsequence', type=str, \
+        help="Name of the input sequence file in fasta format.",
+        required=True, default=None)
+
+    inputgenerator_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
+        help="Name of the output file. \
+              Default is output.txt",
+        required=False, default="output.txt")
+    
+    inputgenerator_parser.add_argument('--otype', dest='otype', type=str, \
+        help='polyphen or VESPA. Default is polyphen.', \
+        required=False, default='polyphen')
+
     args = main_parser.parse_args()
 
     if args.command == "maps":
@@ -367,6 +392,8 @@ def main():
        randsubsetApp(args)
     elif args.command == "diffmap":
        diffmapApp(args)
+    elif args.command == "inputgenerator":
+       inputgeneratorApp(args)
     elif args.command == "-h" or args.command == "--help":
         usage_main()
     else:

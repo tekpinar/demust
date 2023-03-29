@@ -1,8 +1,8 @@
 # demust
 
-*A Python toolkit to modify, visualize and analyze deep mutational scanning (DMS) data of proteins.*
+*A Python toolkit to prepare, modify, visualize and analyze deep mutational scanning (DMS) data of proteins.*
 
-demust contains five main scripts: plots, maps, convert, compare and removegaps. 
+demust contains several scripts: plots, maps, convert, compare and removegaps, extract, compare, inputgenerator etc. 
 
 ## Installation
 Download the repository:
@@ -36,7 +36,9 @@ It is supposed to be a 2D plots tool.
 
 demust convert will convert text output from (to) GEMME to (from) FoldX and Rhapsody formats. 
 
-demust compare will give you Spearman correlation between two DMS data sets.  
+demust compare will give you Spearman correlation between two DMS data sets.
+
+demust inputgenerator will produce input files for polyphen2 from fasta file. 
 
 ## Cite
 We recommend you to put a link to the github repository for now. 

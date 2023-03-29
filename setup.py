@@ -26,7 +26,7 @@ from demust import __version__ as cp_vers
 
 setup(name='demust',
       version=cp_vers,
-      description="A Python toolkit to visualize and analyze deep mutational scanning data of proteins.",
+      description="A Python toolkit to prepare, modify, visualize and analyze deep mutational scanning data of proteins.",
       long_description=open('README.md').read(),
       long_description_content_type="text/markdown",
       author="Mustafa Tekpinar",
