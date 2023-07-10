@@ -49,7 +49,7 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
                     offSet=0, pixelType='square',
                     aaOrder="ACDEFGHIKLMNPQRSTVWY", \
                     sequence=None,\
-                    interactive=True,\
+                    interactive=False,\
                     isColorBarOn=False):
     """
         A function to plot deep mutational scanning matrices. 

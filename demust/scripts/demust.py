@@ -11,6 +11,7 @@ from demust.scripts.riesselman import riesselmanApp
 from demust.scripts.randsubset import randsubsetApp
 from demust.scripts.diffmap import diffmapApp
 from demust.scripts.inputgenerator import inputgeneratorApp
+from demust.scripts.postprocess import postprocessApp
 #TODO:
 
 def usage_main():
@@ -371,7 +372,21 @@ def main():
     inputgenerator_parser.add_argument('--otype', dest='otype', type=str, \
         help='polyphen or VESPA. Default is polyphen.', \
         required=False, default='polyphen')
-
+    
+    #postprocess script argument parsing; copied as it is from sedy. 
+    postprocess_parser  = subparsers.add_parser('postprocess')
+    postprocess_parser.add_argument("-i", "--input", \
+        help="rmsf, dfi or schlitter file that contain at least two columns.", \
+        dest="input", required=True, default=None)
+    postprocess_parser.add_argument("-c", "--column", 
+        help="An integer value for the data column to process.",
+        dest="column", type=int,  required=False, default=2)
+    postprocess_parser.add_argument("--process", \
+        help="One of these options: ranksort, 1-ranksort, minmax, 1-minmax, 1-values, zscore, negzscore, attenuate", 
+        dest="process", type=str,  required=False, default=None)
+    postprocess_parser.add_argument("-o", "--outfile", 
+        help="Name of your output file.", 
+        dest="outfile", default="outfile.dat")
     args = main_parser.parse_args()
 
     if args.command == "maps":
@@ -394,6 +409,8 @@ def main():
        diffmapApp(args)
     elif args.command == "inputgenerator":
        inputgeneratorApp(args)
+    elif args.command == "postprocess":
+        postprocessApp(args)
     elif args.command == "-h" or args.command == "--help":
         usage_main()
     else:

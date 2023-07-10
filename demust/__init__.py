@@ -7,6 +7,6 @@ Purpose     : A Python toolkit to prepare, modify, visualize and analyze deep mu
               scanning data of proteins.
 """
 
-__all__ = ['maps', 'plots', 'compare', 'convert', 'removegaps', 'extract', 'randsubset', 'diffmap', 'inputgenerator']
+__all__ = ['maps', 'plots', 'compare', 'convert', 'removegaps', 'extract', 'randsubset', 'diffmap', 'inputgenerator', 'postprocess']
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
