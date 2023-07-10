@@ -39,7 +39,6 @@ def parseGEMMEoutput(inputFile, verbose):
             else:
                 tempList.append(float(item))
         matrixData.append(tempList)
-
     mutationsData = np.array(matrixData)
     # mutatedTransposed = mutationsData.T
     # return mutatedTransposed
@@ -104,17 +103,20 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     #We subtract 1 from beg bc matrix indices starts from 0
     if(end == None):
         end = len(scanningMatrix[0])
-
+        
     print("Beginning: "+str(beg))
     print("End      : "+str(end))
-    
-    print(len(scanningMatrix[0]))
+    #print(scanningMatrix)
+    #np.reshape(scanningMatrix.flatten(), (20, 286))
+    #print(len(scanningMatrix[0]))
+
     subMatrix = scanningMatrix[:, (beg-1):end]
     #print(subMatrix)
 
     ##########################################################################
     # Set plotting parameters
     nres_shown = len(subMatrix[0])
+    print(nres_shown)
     fig_height=8
     # figure proportions
     fig_width = fig_height/2  # inches
@@ -697,7 +699,7 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
         for i in range (len(subMatrix[0])):
             j = beg-1+i
             # print(i, aaOrderList.index(sequence[i]))
-            plt.scatter(i, aaOrderList.index(mySeqFile.seq[j]), s=5, c='black', marker='o')
+            plt.scatter(i, aaOrderList.index(mySeqFile.seq[j].upper()), s=5, c='black', marker='o')
     
     if(isColorBarOn):
         from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -1214,6 +1216,91 @@ def parseExperimentalData(inputcsv, experiment='DMS_score',
     else:
         df = pd.read_csv(inputcsv, sep=";", decimal=",")
 
+    #Add three new columns.
+    df['wt'] = ""
+    df['mutation']=""
+    df['resid']=""
+
+    if(debug):
+        print (df.columns)
+
+    # Fill the 
+    for index, row in df.iterrows():
+        df['wt'].iloc[index] = row['mutant'][0]
+        df['mutation'].iloc[index] = row['mutant'][-1]
+        df['resid'].iloc[index] = int(row['mutant'][1:-1])
+        #print(index, row['mutant'], row['DMS_score'])
+
+    #Create a new dataframe from only the necessary columns
+    new_df = df[['wt','resid', 'mutation', experiment]].copy()
+    if(debug):
+        print(list(new_df['resid']))
+
+    minResid = new_df['resid'].min()
+    maxResid = new_df['resid'].max()
+    
+    numCols = maxResid - minResid + 1
+
+    print(numCols)
+
+    # dmsMap  = pd.DataFrame(index=range(numRows), columns=['resid']+alphabeticalAminoAcidsList, dtype=float)
+
+    colsList = [str(x) for x in np.arange(1, numCols+1)] 
+    #dmsMap  = pd.DataFrame(index=range(20), columns=colsList, dtype=float)
+    dmsMap  = pd.DataFrame(index=alphabeticalAminoAcidsList, columns=colsList, dtype=float)
+    
+    #print(dmsMap.columns)
+    #print(['resid']+alphabeticalAminoAcidsList)
+
+    for index, row in new_df.iterrows():
+        # print(index, row)
+        for aa in alphabeticalAminoAcidsList:
+            if(row['mutation'] == aa):
+                dmsMap[str(row['resid']-minResid + 1)].loc[aa] = row[experiment]
+    
+    if(outputcsv != None):
+        dmsMap.to_csv(outputcsv, index=True)
+
+    return dmsMap.to_numpy()
+
+def parseSingleLineData(inputcsv, experiment='DMS_score', 
+                            outputcsv="convertedMatrix.csv",
+                            debug = False):
+    """
+        Parse Singleline Format data
+
+
+    Parameters
+    ----------
+    inputcsv: string
+        Name of the experimental input data file in csv format
+    
+    experiment: string
+        Name of the experiment such as score, screenscore, fitness,
+        abundance. To parse ProteinGym data, set this value to 
+        'DMS_score'.
+
+    outputcsv: string
+        Name of the output data file in csv format.
+
+    debug: bool
+        If True, it will print some extra data to stdout. 
+    
+    datasource: string
+        It should take 'proteingym' value if you want to parse
+        ProteinGym data. Otherwise, don't use it. In this case,
+        it assumes that the datasource is Riesseman, 2016 csv files.
+
+    Returns
+    -------
+    Data as a Numpy array, where each col contains 
+        an experimental parameter for an amino acid mutation.
+        Rows of the matrix are amino acids in alphabetical order. 
+    """
+
+    df = pd.read_csv(inputcsv, header=None, sep='\s+')
+    df.columns=['mutant', experiment]
+    print(df)
     #Add three new columns.
     df['wt'] = ""
     df['mutation']=""

@@ -71,7 +71,7 @@ def main():
         required=True, default=None)
 
     maps_parser.add_argument('-d', '--datatype', dest='datatype', type=str, \
-        help='gemme, rhapsody, foldx, evmutation or proteingym', \
+        help='gemme, rhapsody, foldx, evmutation, proteingym, singleline', \
         required=False, default='gemme')
 
     maps_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \

@@ -48,9 +48,9 @@ def mapsApp(args):
                 plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
                     colorMap=args.colormap, offSet=args.offset, pixelType='square',\
                     aaOrder=args.aaorder, sequence=args.sequence, interactive=False, isColorBarOn=args.iscolorbaron)
-                # plotDecoratedMatrix(gemmeData, args.outputfile, args.beginning, args.end,\
+                # plotDecoratedMatrix2(gemmeData, args.outputfile, args.beginning, args.end,\
                 #     colorMap=args.colormap, offSet=args.offset, pixelType='square',\
-                #     aaOrder=args.aaorder, sequence=args.sequence)
+                #     aaOrder=args.aaorder, sequence=args.sequence, interactive=False, isColorBarOn=args.iscolorbaron)
 
     elif (args.datatype.lower()==('rhapsody' or 'rapsody')):
         rhapsodyData = parseRHAPSODYoutput(args.inputfile, field=args.field)
@@ -119,6 +119,41 @@ def mapsApp(args):
                                colorMap = args.colormap, offSet=args.offset, \
                                pixelType='square', aaOrder=args.aaorder, \
                                sequence=args.sequence, interactive=False, isColorBarOn=args.iscolorbaron)
+    elif (args.datatype.lower()=='singleline'):
+
+        expDataMatrix = parseSingleLineData(args.inputfile, \
+                                            experiment="DMS_score",\
+                                            outputcsv=None,\
+                                            debug = False)
+        if(args.end == None):
+            args.end = len(expDataMatrix[0])
+        
+        if(args.paginate!=0):
+            sequenceLength = (args.end - args.beginning - 1) # -1 is for starting the count from 0. 
+
+            rowLength = args.paginate
+            numberOfImageChunks = int(int(sequenceLength)/int(rowLength))
+            for i in range(numberOfImageChunks):
+                plotExperimentalMatrix(expDataMatrix, args.outputfile+"_part_"+str(i+1), \
+                    i*rowLength + args.beginning, \
+                    (i+1)*rowLength + args.beginning -1,\
+                    colorMap=args.colormap, offSet=i*rowLength + args.offset, pixelType='square',\
+                    aaOrder=args.aaorder, sequence=args.sequence, interactive=False, isColorBarOn=args.iscolorbaron)
+            if(sequenceLength%rowLength != 0):
+                plotExperimentalMatrix(expDataMatrix, args.outputfile+"_part_"+str(i+2), \
+                    (i+1)*rowLength + args.beginning, \
+                    args.end,\
+                    colorMap=args.colormap, offSet=(i+1)*rowLength + args.offset, pixelType='square',\
+                    aaOrder=args.aaorder, sequence=args.sequence, interactive=False, isColorBarOn=args.iscolorbaron)
+
+
+        else:    
+            # Plot the experimental DMS map with wild-type residues annotated with dots.
+            plotExperimentalMatrix(expDataMatrix, args.outputfile, \
+                                args.beginning, args.end, \
+                                colorMap = args.colormap, offSet=args.offset, \
+                                pixelType='square', aaOrder=args.aaorder, \
+                                sequence=args.sequence, interactive=False, isColorBarOn=args.iscolorbaron)
 
     else:
         print("\nError: Unknown data type!")

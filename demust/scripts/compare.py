@@ -328,7 +328,7 @@ def compareApp(args):
     
         
 
-    debug = True
+    debug = False
     print("\nRunning 'demust compare' app...\n")
     if((args.itype == "gemme") and (args.jtype == "gemme")):
         dataSet1 = parseGEMMEoutput(args.inputfile1, verbose=False)
