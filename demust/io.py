@@ -4,14 +4,37 @@ import sys
 import argparse
 import numpy as np
 import matplotlib.pylab as plt
+import matplotlib
 from matplotlib.gridspec import GridSpec
 from Bio import SeqIO
 import pandas as pd
 from scipy.stats import rankdata
+from collections import OrderedDict
 
 
 alphabeticalAminoAcidsList = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
                               'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+aaSingleNucleotideNeighborDict = OrderedDict()
+aaSingleNucleotideNeighborDict['A'] = ['V', 'D', 'E', 'G', 'T', 'P', 'S']
+aaSingleNucleotideNeighborDict['C'] = ['F', 'S', 'Y', 'W', 'R', 'G']
+aaSingleNucleotideNeighborDict['D'] = ['V', 'A', 'G', 'E', 'N', 'H', 'Y']
+aaSingleNucleotideNeighborDict['E'] = ['V', 'A', 'G', 'D', 'K', 'Q']
+aaSingleNucleotideNeighborDict['F'] = ['S', 'C', 'Y', 'L', 'I', 'V']
+aaSingleNucleotideNeighborDict['G'] = ['V', 'A', 'D', 'E', 'R', 'S', 'W', 'C']
+aaSingleNucleotideNeighborDict['H'] = ['L', 'P', 'Q', 'R', 'Y', 'N', 'D']
+aaSingleNucleotideNeighborDict['I'] = ['F', 'L', 'V', 'M', 'T', 'N', 'S']
+aaSingleNucleotideNeighborDict['K'] = ['N', 'T', 'M', 'R', 'Q', 'E']
+aaSingleNucleotideNeighborDict['L'] = ['F', 'I', 'V', 'M', 'P', 'H', 'Q', 'R', 'S', 'W']
+aaSingleNucleotideNeighborDict['M'] = ['T', 'K', 'R', 'I', 'L', 'V']
+aaSingleNucleotideNeighborDict['N'] = ['I', 'T', 'S', 'K', 'H', 'D', 'Y']
+aaSingleNucleotideNeighborDict['P'] = ['L', 'H', 'Q', 'R', 'S', 'T', 'A']
+aaSingleNucleotideNeighborDict['Q'] = ['L', 'P', 'R', 'H', 'K', 'E']
+aaSingleNucleotideNeighborDict['R'] = ['L', 'P', 'Q', 'H', 'C', 'W', 'S', 'G', 'M', 'T', 'K']
+aaSingleNucleotideNeighborDict['S'] = ['F', 'L', 'Y', 'C', 'W', 'P', 'T', 'A', 'I', 'N', 'R', 'G']
+aaSingleNucleotideNeighborDict['T'] = ['I', 'M', 'N', 'K', 'S', 'R', 'A', 'P']
+aaSingleNucleotideNeighborDict['V'] = ['A', 'D', 'E', 'G', 'F', 'L', 'I', 'M']
+aaSingleNucleotideNeighborDict['W'] = ['L', 'S', 'C', 'R', 'G']
+aaSingleNucleotideNeighborDict['Y'] = ['F', 'S', 'C', 'H', 'N', 'D']
 def parseGEMMEoutput(inputFile, verbose):
     """
         Parse normalized (I don't know how?!) GEMME output files: 
@@ -45,12 +68,13 @@ def parseGEMMEoutput(inputFile, verbose):
     return mutationsData
 
 def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
-                    colorMap = 'coolwarm', \
+                    colorMap = 'turbo_r', \
                     offSet=0, pixelType='square',
                     aaOrder="ACDEFGHIKLMNPQRSTVWY", \
                     sequence=None,\
                     interactive=False,\
-                    isColorBarOn=False):
+                    isColorBarOn=False,\
+                    onylDNAaccessible=False):
     """
         A function to plot deep mutational scanning matrices. 
   
@@ -93,6 +117,10 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     isColorBarOn: bool
         If True, it will show a colorbar to show the numerical scale of
         the colors. Default is False. 
+
+    onylDNAaccessible: bool
+        If True, it will show mutations that are accessible from 'only' one 
+        nucleotide mutations. The other locations will be shown as white. 
 
     Returns
     -------
@@ -152,8 +180,34 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     ax.set_yticklabels(major_labels_y, ha='left')
     ax.tick_params(axis='y', which='major', pad=30)
 
-    
+    # print(subMatrix)
     #############################################################################
+    onylDNAaccessibleList = []
+    current_cmap = matplotlib.cm.get_cmap()
+    current_cmap.set_bad(color='white')
+    if(sequence!=None):
+        mySeqFile = SeqIO.read(sequence, 'fasta')
+
+        # onylDNAaccessible = True
+        if(onylDNAaccessible==True):
+            mySeqFile = SeqIO.read(sequence, 'fasta')
+            
+            #print(mySeqFile)
+            #Convert aaOrder to a list.
+            aaOrderList = list(aaOrder)
+            for i in range (len(subMatrix[0])):
+                j = beg-1+i
+                # print(i, aaOrderList.index(sequence[i]))
+                notInTheList = list(set(alphabeticalAminoAcidsList) - set(aaSingleNucleotideNeighborDict[mySeqFile.seq[j].upper()]))
+                notInTheList.remove(mySeqFile.seq[j].upper())
+                for item in notInTheList:
+                    # plt.scatter(i, aaOrderList.index(item), s=75, c='white', marker='x')
+                    #plt.scatter(i, aaOrderList.index(item), s=200, c='white', marker='s')
+                    onylDNAaccessibleList.append([i, aaOrderList.index(item)])
+            for item in onylDNAaccessibleList:
+                # print(item)
+                subMatrix[item[1]][item[0]] = np.nan
+    # print(subMatrix)
     if(pixelType=='square'):
         #For plotting square pixels
         img = plt.imshow(subMatrix, cmap=colorMap)
@@ -165,8 +219,8 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
         sys.exit(-1)
     
     #To make the colors consistent if there are submatrices.
-    plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
-    #plt.clim([-5.0, 5.0])
+    #plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
+    plt.clim([-10.0, 2.0])
     if(sequence!=None):
         mySeqFile = SeqIO.read(sequence, 'fasta')
         #print(mySeqFile)
@@ -176,7 +230,27 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
             j = beg-1+i
             # print(i, aaOrderList.index(sequence[i]))
             plt.scatter(i, aaOrderList.index(mySeqFile.seq[j].upper()), s=5, c='black', marker='o')
-    
+
+        # onylDNAaccessible = True
+        # if(onylDNAaccessible==True):
+        #     mySeqFile = SeqIO.read(sequence, 'fasta')
+        #     onylDNAaccessibleList = []
+        #     #print(mySeqFile)
+        #     #Convert aaOrder to a list.
+        #     aaOrderList = list(aaOrder)
+        #     for i in range (len(subMatrix[0])):
+        #         j = beg-1+i
+        #         # print(i, aaOrderList.index(sequence[i]))
+        #         notInTheList = list(set(alphabeticalAminoAcidsList) - set(aaSingleNucleotideNeighborDict[mySeqFile.seq[j].upper()]))
+        #         notInTheList.remove(mySeqFile.seq[j].upper())
+        #         for item in notInTheList:
+        #             # plt.scatter(i, aaOrderList.index(item), s=75, c='white', marker='x')
+        #             plt.scatter(i, aaOrderList.index(item), s=216, c='white', marker='s')
+        #             # onylDNAaccessibleList.append([i, aaOrderList.index(item)])
+        # #     for item in onylDNAaccessibleList:
+        # #         subMatrix[item[0]][item[1]] = np.nan
+
+
     if(isColorBarOn):
         from mpl_toolkits.axes_grid1 import make_axes_locatable
         divider = make_axes_locatable(ax)

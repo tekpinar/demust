@@ -118,6 +118,10 @@ def main():
     maps_parser.add_argument('--aaorder', dest='aaorder', type=str, \
         help='Amino acid order as a single string. Default is alphabetical: \"ACDEFGHIKLMNPQRSTVWY\"', \
         required=False, default='ACDEFGHIKLMNPQRSTVWY')
+    
+    maps_parser.add_argument('--onlydnaaccessible', dest='onlydnaaccessible', type=bool, \
+        help='A True or False value to mask mutations that are more than one nucleotide away. Default is False.',
+        required=False, default=False)
 
     #plots script argument parsing
     plots_parser = subparsers.add_parser('plots', \

@@ -37,17 +37,20 @@ def mapsApp(args):
                         i*rowLength + args.beginning, \
                         (i+1)*rowLength + args.beginning -1,\
                         colorMap=args.colormap, offSet=i*rowLength + args.offset, pixelType='square',\
-                        aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron)
+                        aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron, \
+                        onylDNAaccessible=args.onlydnaaccessible)
                 if(sequenceLength%rowLength != 0):
                     plotGEMMEmatrix(gemmeData, args.outputfile+"_part_"+str(i+2), \
                         (i+1)*rowLength + args.beginning, \
                         args.end,\
                         colorMap=args.colormap, offSet=(i+1)*rowLength + args.offset, pixelType='square',\
-                        aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron)
+                        aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron, \
+                        onylDNAaccessible=args.onlydnaaccessible)
             else:
                 plotGEMMEmatrix(gemmeData, args.outputfile, args.beginning, args.end,\
                     colorMap=args.colormap, offSet=args.offset, pixelType='square',\
-                    aaOrder=args.aaorder, sequence=args.sequence, interactive=False, isColorBarOn=args.iscolorbaron)
+                    aaOrder=args.aaorder, sequence=args.sequence, interactive=False, isColorBarOn=args.iscolorbaron, \
+                    onylDNAaccessible=args.onlydnaaccessible)
                 # plotDecoratedMatrix2(gemmeData, args.outputfile, args.beginning, args.end,\
                 #     colorMap=args.colormap, offSet=args.offset, pixelType='square',\
                 #     aaOrder=args.aaorder, sequence=args.sequence, interactive=False, isColorBarOn=args.iscolorbaron)
@@ -68,17 +71,20 @@ def mapsApp(args):
                     i*rowLength + args.beginning, \
                     (i+1)*rowLength + args.beginning -1,\
                     colorMap=args.colormap, offSet=i*rowLength + args.offset, pixelType='square',\
-                    aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron)
+                    aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron,\
+                    onylDNAaccessible=args.onlydnaaccessible)
             if(sequenceLength%rowLength != 0):
                 plotGEMMEmatrix(rhapsodyData, args.outputfile+"_part_"+str(i+2), \
                     (i+1)*rowLength + args.beginning, \
                     args.end,\
                     colorMap=args.colormap, offSet=(i+1)*rowLength + args.offset, pixelType='square',\
-                    aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron)
+                    aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron,\
+                    onylDNAaccessible=args.onlydnaaccessible)
         else:        
             plotGEMMEmatrix(rhapsodyData, args.outputfile, args.beginning, args.end,\
                 colorMap=args.colormap, offSet=args.offset, pixelType='square',\
-                aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron)
+                aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron, \
+                onylDNAaccessible=args.onlydnaaccessible)
         
     elif (args.datatype.lower()=='foldx'):
         foldxData = parseFOLDXoutput(args.inputfile, colorThreshhold=7.5, colorCorrect=True)
@@ -96,17 +102,20 @@ def mapsApp(args):
                     i*rowLength + args.beginning, \
                     (i+1)*rowLength + args.beginning -1,\
                     colorMap=args.colormap, offSet=i*rowLength + args.offset, pixelType='square',\
-                    aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron)
+                    aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron, \
+                    onylDNAaccessible=args.onlydnaaccessible)
             if(sequenceLength%rowLength != 0):
                 plotGEMMEmatrix(foldxData, args.outputfile+"_part_"+str(i+2), \
                     (i+1)*rowLength + args.beginning, \
                     args.end,\
                     colorMap=args.colormap, offSet=(i+1)*rowLength + args.offset, pixelType='square',\
-                    aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron)
+                    aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron,\
+                    onylDNAaccessible=args.onlydnaaccessible)
         else:        
             plotGEMMEmatrix(foldxData, args.outputfile, args.beginning, args.end,\
                 colorMap=args.colormap, offSet=args.offset, pixelType='square',\
-                aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron)
+                aaOrder=args.aaorder, sequence=args.sequence, isColorBarOn=args.iscolorbaron,\
+                onylDNAaccessible=args.onlydnaaccessible)
     elif (args.datatype.lower()=='proteingym'):
         expDataMatrix = parseExperimentalData(args.inputfile, \
                                             experiment="DMS_score",\
