@@ -74,7 +74,7 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
                     sequence=None,\
                     interactive=False,\
                     isColorBarOn=False,\
-                    onylDNAaccessible=False):
+                    onlyDNAaccessible=False):
     """
         A function to plot deep mutational scanning matrices. 
   
@@ -118,7 +118,7 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
         If True, it will show a colorbar to show the numerical scale of
         the colors. Default is False. 
 
-    onylDNAaccessible: bool
+    onlyDNAaccessible: bool
         If True, it will show mutations that are accessible from 'only' one 
         nucleotide mutations. The other locations will be shown as white. 
 
@@ -182,16 +182,16 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
 
     # print(subMatrix)
     #############################################################################
-    onylDNAaccessibleList = []
+    onlyDNAaccessibleList = []
     current_cmap = matplotlib.cm.get_cmap()
     current_cmap.set_bad(color='white')
     if(sequence!=None):
         mySeqFile = SeqIO.read(sequence, 'fasta')
 
         # onylDNAaccessible = True
-        if(onylDNAaccessible==True):
+        if(onlyDNAaccessible==True):
             mySeqFile = SeqIO.read(sequence, 'fasta')
-            
+            # print("I am plotting only DNA accessible mutations.")
             #print(mySeqFile)
             #Convert aaOrder to a list.
             aaOrderList = list(aaOrder)
@@ -203,8 +203,8 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
                 for item in notInTheList:
                     # plt.scatter(i, aaOrderList.index(item), s=75, c='white', marker='x')
                     #plt.scatter(i, aaOrderList.index(item), s=200, c='white', marker='s')
-                    onylDNAaccessibleList.append([i, aaOrderList.index(item)])
-            for item in onylDNAaccessibleList:
+                    onlyDNAaccessibleList.append([i, aaOrderList.index(item)])
+            for item in onlyDNAaccessibleList:
                 # print(item)
                 subMatrix[item[1]][item[0]] = np.nan
     # print(subMatrix)
@@ -231,10 +231,10 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
             # print(i, aaOrderList.index(sequence[i]))
             plt.scatter(i, aaOrderList.index(mySeqFile.seq[j].upper()), s=5, c='black', marker='o')
 
-        # onylDNAaccessible = True
-        # if(onylDNAaccessible==True):
+
+        # if(onlyDNAaccessible==True):
         #     mySeqFile = SeqIO.read(sequence, 'fasta')
-        #     onylDNAaccessibleList = []
+        #     onlyDNAaccessibleList = []
         #     #print(mySeqFile)
         #     #Convert aaOrder to a list.
         #     aaOrderList = list(aaOrder)
@@ -246,8 +246,8 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
         #         for item in notInTheList:
         #             # plt.scatter(i, aaOrderList.index(item), s=75, c='white', marker='x')
         #             plt.scatter(i, aaOrderList.index(item), s=216, c='white', marker='s')
-        #             # onylDNAaccessibleList.append([i, aaOrderList.index(item)])
-        # #     for item in onylDNAaccessibleList:
+        #             # onlyDNAaccessibleList.append([i, aaOrderList.index(item)])
+        # #     for item in onlyDNAaccessibleList:
         # #         subMatrix[item[0]][item[1]] = np.nan
 
 
@@ -649,7 +649,8 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
                     aaOrder="ACDEFGHIKLMNPQRSTVWY", \
                     sequence=None,\
                     interactive=True,\
-                    isColorBarOn=False):
+                    isColorBarOn=False,\
+                    onlyDNAaccessible=False):
     """
         A function to plot deep mutational scanning data from
         the Rieselamn dataset. 
@@ -692,7 +693,10 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
 
     isColorBarOn: bool
         If True, it will show a colorbar to show the numerical scale of
-        the colors. Default is False. 
+        the colors. Default is False.
+    onlyDNAaccessible: bool
+        If True, it will show mutations that are accessible from 'only' one 
+        nucleotide mutations. The other locations will be shown as white. 
 
     Returns
     -------
@@ -751,7 +755,32 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
     ax.set_yticklabels(major_labels_y, ha='left')
     ax.tick_params(axis='y', which='major', pad=30)
 
-    
+    #############################################################################
+    onlyDNAaccessibleList = []
+    current_cmap = matplotlib.cm.get_cmap()
+    current_cmap.set_bad(color='white')
+    if(sequence!=None):
+        mySeqFile = SeqIO.read(sequence, 'fasta')
+
+        # onylDNAaccessible = True
+        if(onlyDNAaccessible==True):
+            mySeqFile = SeqIO.read(sequence, 'fasta')
+            print("I am plotting only DNA accessible mutations.")
+            #print(mySeqFile)
+            #Convert aaOrder to a list.
+            aaOrderList = list(aaOrder)
+            for i in range (len(subMatrix[0])):
+                j = beg-1+i
+                # print(i, aaOrderList.index(sequence[i]))
+                notInTheList = list(set(alphabeticalAminoAcidsList) - set(aaSingleNucleotideNeighborDict[mySeqFile.seq[j].upper()]))
+                notInTheList.remove(mySeqFile.seq[j].upper())
+                for item in notInTheList:
+                    # plt.scatter(i, aaOrderList.index(item), s=75, c='white', marker='x')
+                    #plt.scatter(i, aaOrderList.index(item), s=200, c='white', marker='s')
+                    onlyDNAaccessibleList.append([i, aaOrderList.index(item)])
+            for item in onlyDNAaccessibleList:
+                # print(item)
+                subMatrix[item[1]][item[0]] = np.nan
     #############################################################################
     if(pixelType=='square'):
         #For plotting square pixels
@@ -764,7 +793,14 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
         sys.exit(-1)
     
     #To make the colors consistent if there are submatrices.
-    plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
+    # plt.clim(np.min(scanningMatrix), np.max(scanningMatrix))
+
+    #This value here does not make sense if you are really plotting experimental data.
+    #I had to do this to make the colors consistent to plot only DNA accessible mutations.
+    #The source data for them is frequency modifed ESGEMME scores and they are typically 
+    #between -10 and 2.
+    #plt.clim([-6.0, 0.0]) 
+    plt.clim([-10.0, 2.0]) 
 
     if(sequence!=None):
         mySeqFile = SeqIO.read(sequence, 'fasta')
@@ -1385,10 +1421,14 @@ def parseSingleLineData(inputcsv, experiment='DMS_score',
 
     # Fill the 
     for index, row in df.iterrows():
-        df['wt'].iloc[index] = row['mutant'][0]
-        df['mutation'].iloc[index] = row['mutant'][-1]
-        df['resid'].iloc[index] = int(row['mutant'][1:-1])
+        # df['wt'].iloc[index] = row['mutant'][0]
+        # df['mutation'].iloc[index] = row['mutant'][-1]
+        # df['resid'].iloc[index] = int(row['mutant'][1:-1])
         #print(index, row['mutant'], row['DMS_score'])
+
+        df.loc[index, 'wt'] = row['mutant'][0]
+        df.loc[index, 'mutation'] = row['mutant'][-1]
+        df.loc[index, 'resid'] = int(row['mutant'][1:-1])
 
     #Create a new dataframe from only the necessary columns
     new_df = df[['wt','resid', 'mutation', experiment]].copy()
