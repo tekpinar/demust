@@ -103,16 +103,26 @@ def attenuateEndPoints(data):
         sys.exit(-1)
 
 def postprocessApp(args):
-    #Mostyl, I am using normPred_Combi_singleline as input file and it doesn't have a header.
-    df = pd.read_table(args.input, sep="\s+", header=None)
 
-    #data = np.genfromtxt(args.input,dtype=None)
-    data = df.to_numpy()
+    if(args.itype=='gemme'):
+        #Mostyl, I am using normPred_Combi_singleline as input file and it doesn't have a header.
+        df = pd.read_table(args.input, sep="\s+", header=None)
 
-    # print(data)
-    rawData = data.T[args.column-1]
-    # print(rawData)
-    # processedData = rankdata(rawData.T[args.column - 1])/float(len(rawData.T[args.column - 1]))
+        #data = np.genfromtxt(args.input,dtype=None)
+        data = df.to_numpy()
+
+        # print(data)
+        rawData = data.T[args.column-1]
+        # print(rawData)
+        # processedData = rankdata(rawData.T[args.column - 1])/float(len(rawData.T[args.column - 1]))
+    elif(args.itype=='esm1b'):
+        dfESMvariants = pd.read_csv(args.input)
+        # dfESMvariants.rename(columns = {'mut_name':'mutant'}, inplace = True)
+        rawData = dfESMvariants['esm_score'].to_numpy()
+
+    else:
+        print("Unknown input type: {}".format(args.itype))
+        sys.exit(-1)
 
     if(args.process == 'ranksort'):
         processedData = rankSortData(rawData)
@@ -137,10 +147,16 @@ def postprocessApp(args):
         sys.exit(-1)
 
     print("@> Processing the data started!")
-    with open(args.outfile, 'w') as f:
-        #f.write("#Resid Value\n")
-        for i in range (len(processedData)):
-            f.write("{:} {:6.2f}\n".format(data.T[0][i], processedData[i]))
+    
+    if(args.itype=='gemme'):
+        with open(args.outfile, 'w') as f:
+            #f.write("#Resid Value\n")
+            for i in range (len(processedData)):
+                f.write("{:} {:6.2f}\n".format(data.T[0][i], processedData[i]))
+    if(args.itype=='esm1b'):
+        dfESMvariants['esm_score'] = processedData
+        dfESMvariants.to_csv(args.outfile, index=False)
+
     print("@> Processing the data finished successfully!")
     sys.exit()
 

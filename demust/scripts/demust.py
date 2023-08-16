@@ -380,8 +380,11 @@ def main():
     #postprocess script argument parsing; copied as it is from sedy. 
     postprocess_parser  = subparsers.add_parser('postprocess')
     postprocess_parser.add_argument("-i", "--input", \
-        help="rmsf, dfi or schlitter file that contain at least two columns.", \
+        help="gemme file in a two columns format.", \
         dest="input", required=True, default=None)
+    postprocess_parser.add_argument("--itype", \
+        help="It is gemme, generic or esm1b.", \
+        dest="itype", required=False, default="gemme")
     postprocess_parser.add_argument("-c", "--column", 
         help="An integer value for the data column to process.",
         dest="column", type=int,  required=False, default=2)

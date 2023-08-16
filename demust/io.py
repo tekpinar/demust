@@ -800,7 +800,7 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
     #The source data for them is frequency modifed ESGEMME scores and they are typically 
     #between -10 and 2.
     #plt.clim([-6.0, 0.0]) 
-    plt.clim([-10.0, 2.0]) 
+    #plt.clim([-10.0, 2.0]) 
 
     if(sequence!=None):
         mySeqFile = SeqIO.read(sequence, 'fasta')
