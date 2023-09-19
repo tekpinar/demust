@@ -388,5 +388,15 @@ def plotsApp(args):
         averageReliability = np.sum(dataArray)/len(dataArray)
         print("Average Reliability Score={:.2f}".format(averageReliability))
 
+    elif (args.datatype.lower()=='average'):
+        df = pd.read_csv(args.inputfile, delimiter=r"\s+", header=None)
+        print(df)
+        dataArray = (df[1].to_numpy())
+        if(debug):
+            print(dataArray)
+        plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+                    colorMap = 'turbo', \
+                    offSet=args.offset, pixelType='square',\
+                    interactive=False, isColorBarOn=True)
     else:
         print("ERROR: Unknown data type: {}.".format(args.datatype))

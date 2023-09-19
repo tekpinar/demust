@@ -119,18 +119,18 @@ def main():
         help='Amino acid order as a single string. Default is alphabetical: \"ACDEFGHIKLMNPQRSTVWY\"', \
         required=False, default='ACDEFGHIKLMNPQRSTVWY')
     
-    maps_parser.add_argument('--onlydnaaccessible', dest='onlydnaaccessible', type=bool, \
-        help='A True or False value to mask mutations that are more than one nucleotide away. Default is False.',
-        required=False, default=False)
+    maps_parser.add_argument('--onlydnaaccessible', dest='onlydnaaccessible', type=str, \
+        help='A DNA sequence file exatly matching to the protein sequence. Default is None.',
+        required=False, default=None)
 
     #plots script argument parsing
     plots_parser = subparsers.add_parser('plots', \
-        description="Can plot 2D data: 'min or max from DMS maps' or 'trace, pc or cv from JET files.")
+        description="Can plot 2D data: 'min, max or average from DMS maps' or 'trace, pc or cv from JET files.")
     plots_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
         help='One of the output files of gemme, rhapsody or evmutation', \
         required=True, default=None)
     plots_parser.add_argument('-d', '--datatype', dest='datatype', type=str, \
-        help='gemme, rhapsody, foldx, evmutation, riesselman, , fasta, jet or pdb.', \
+        help='gemme, rhapsody, foldx, evmutation, riesselman, fasta, jet, pdb or average.', \
         required=False, default='gemme')
     plots_parser.add_argument('-b', '--beginning', dest='beginning', type=int, \
         help='An integer to indicate the first residue index.',
@@ -139,7 +139,7 @@ def main():
         help='An integer to indicate the final residue index.',
         required=False, default=None)
     plots_parser.add_argument('-t', '--type', dest='type', type=str, \
-        help='Type of the 2D data that you want to extract. \n It can be min or max for DMS maps. It can be trace, pc or cv for JET files.', \
+        help='Type of the 2D data that you want to extract. \n It can be min or max for DMS maps. It can be trace, pc or cv for JET files. It can be average from 2 column (Resid and Average Value) text files.', \
         required=False, default=False)
     plots_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
         help='Name of the output file.', \
@@ -147,7 +147,6 @@ def main():
     plots_parser.add_argument('--paginate', dest='paginate', type=int, \
         help='An integer value. Default is 0, which means to plot without pagination.',
         required=False, default=0)    
-
     plots_parser.add_argument('--offset', dest='offset', type=int, \
         help='An integer value to offset the xlabels for incomplete sequences',
         required=False, default=0) 
