@@ -9,4 +9,4 @@ Purpose     : A Python toolkit to prepare, modify, visualize and analyze deep mu
 
 __all__ = ['maps', 'plots', 'compare', 'convert', 'removegaps', 'extract', 'randsubset', 'diffmap', 'inputgenerator', 'postprocess']
 
-__version__ = '0.0.9'
+__version__ = '0.1.0'
