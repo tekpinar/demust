@@ -395,8 +395,8 @@ def plotsApp(args):
         if(debug):
             print(dataArray)
         plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
-                    colorMap = 'turbo', \
-                    offSet=args.offset, pixelType='square',\
+                    colorMap = 'rainbow', \
+                    offSet=args.offset, pixelType='rectangle',\
                     interactive=False, isColorBarOn=True)
     else:
         print("ERROR: Unknown data type: {}.".format(args.datatype))

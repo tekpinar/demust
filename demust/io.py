@@ -305,7 +305,7 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
     
     #To make the colors consistent if there are submatrices.
     #plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
-    plt.clim([-10.0, 2.0])
+    plt.clim([-5.0, 0.0])
     if(sequence!=None):
         mySeqFile = SeqIO.read(sequence, 'fasta')
         #print(mySeqFile)
@@ -1275,8 +1275,10 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
     #I had to do this to make the colors consistent to plot only DNA accessible mutations.
     #The source data for them is frequency modifed ESGEMME scores and they are typically 
     #between -10 and 2.
-    #plt.clim([-6.0, 0.0]) 
-    #plt.clim([-10.0, 2.0]) 
+    #plt.clim([-6.0, 0.0]) #For frequencies
+    plt.clim([0.0, 1.0]) #For ranksorted or normalized data
+    #plt.clim([-10.0, 2.0]) #For raw ESCOTT data
+    #plt.clim([-20.0, 0.0]) #For ESM1b (esm_variant) data 
 
     if(sequence!=None):
         mySeqFile = SeqIO.read(sequence, 'fasta')

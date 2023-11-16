@@ -383,13 +383,16 @@ def main():
         dest="input", required=True, default=None)
     postprocess_parser.add_argument("--itype", \
         help="It is gemme, generic or esm1b.", \
-        dest="itype", required=False, default="gemme")
+        dest="itype", required=False, default="singleline")
+    postprocess_parser.add_argument("-f", "--fasta", \
+        help="A fasta file containg only sequence of the protein of interest. It is mandatory if you are using gemme outout format.", \
+        dest="fasta", required=False, default=None)
     postprocess_parser.add_argument("-c", "--column", 
         help="An integer value for the data column to process.",
         dest="column", type=int,  required=False, default=2)
     postprocess_parser.add_argument("--process", \
-        help="One of these options: ranksort, 1-ranksort, minmax, 1-minmax, 1-values, zscore, negzscore, attenuate", 
-        dest="process", type=str,  required=False, default=None)
+        help="One of these options: ranksort, 1-ranksort, minmax, 1-minmax, 1-values, zscore, negzscore, attenuate, colrescaleraw, colrescaleranked or colrescalerankedminmax.", 
+        dest="process", type=str,  required=True, default=None)
     postprocess_parser.add_argument("-o", "--outfile", 
         help="Name of your output file.", 
         dest="outfile", default="outfile.dat")

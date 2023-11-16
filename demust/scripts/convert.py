@@ -53,6 +53,10 @@ def convertApp(args):
                         residueList = None,
                         offSet=0)
     elif (args.otype.lower()=='dms'):
+        print("@> Protein= {:}, Average={:.2f}, Min={:.2f}, Max={:.2f} ".format(args.inputfile, \
+                                                                        np.mean(scanningMatrix.flatten()), \
+                                                                        np.amin(scanningMatrix.flatten()), \
+                                                                        np.amax(scanningMatrix.flatten())))
         writeDMSformat(scanningMatrix, args.outputfile, residueList = localResidueList,\
                         beg=args.beginning, end=None, aaOrder = aaOrderList, \
                         offSet=0)
