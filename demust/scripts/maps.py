@@ -5,6 +5,7 @@ import argparse
 import numpy as np
 import matplotlib.pylab as plt
 from demust.io import *
+import pandas as pd
 
 def mapsApp(args):
 
@@ -168,7 +169,52 @@ def mapsApp(args):
                                 pixelType='square', aaOrder=args.aaorder, \
                                 sequence=args.sequence, interactive=False,\
                                 isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible)
+    elif (args.datatype.lower()=='csvtable'):
 
+        # expDataMatrix = parseSingleLineData(args.inputfile, \
+        #                                     experiment="DMS_score",\
+        #                                     outputcsv=None,\
+        #                                     debug = False)
+        gemmeDF = pd.read_csv(args.inputfile, index_col=0)
+        print(gemmeDF)
+        matrix = gemmeDF.to_numpy()
+        print(matrix)
+    
+        expDataMatrix = matrix.T
+        # sys.exit()
+        if(args.end == None):
+            args.end = len(expDataMatrix[0])
+        
+        if(args.paginate!=0):
+            sequenceLength = (args.end - args.beginning - 1) # -1 is for starting the count from 0. 
+            
+            rowLength = args.paginate
+            numberOfImageChunks = int(int(sequenceLength)/int(rowLength))
+            for i in range(numberOfImageChunks):
+                plotExperimentalMatrix(expDataMatrix, args.outputfile+"_part_"+str(i+1), \
+                    i*rowLength + args.beginning, \
+                    (i+1)*rowLength + args.beginning -1,\
+                    colorMap=args.colormap, offSet=i*rowLength + args.offset, pixelType='square',\
+                    aaOrder=args.aaorder, sequence=args.sequence, interactive=False, \
+                    isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible)
+            if(sequenceLength%rowLength != 0):
+                plotExperimentalMatrix(expDataMatrix, args.outputfile+"_part_"+str(i+2), \
+                    (i+1)*rowLength + args.beginning, \
+                    args.end,\
+                    colorMap=args.colormap, offSet=(i+1)*rowLength + args.offset, pixelType='square',\
+                    aaOrder=args.aaorder, sequence=args.sequence, interactive=False, \
+                    isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible)
+
+
+        else:    
+            # Plot the experimental DMS map with wild-type residues annotated with dots.
+            # print("HERE I AM! 3")
+            plotExperimentalMatrix(expDataMatrix, args.outputfile, \
+                                args.beginning, args.end, \
+                                colorMap = args.colormap, offSet=args.offset, \
+                                pixelType='square', aaOrder=args.aaorder, \
+                                sequence=args.sequence, interactive=False,\
+                                isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible)
     else:
         print("\nError: Unknown data type!")
         print("         Data types can only be gemme, rhapsody or foldx!")

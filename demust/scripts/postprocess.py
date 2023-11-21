@@ -357,14 +357,14 @@ def postprocessApp(args):
 
         rawData = matrix.T.flatten()
 
-        offset = 0
+        #offset = 0
         # # print(gemmeDF)
         # gemmeDFtrans.columns = gemmeDFtrans.columns.str.upper()
         aaAndPosition = []
         # oldNamesList = gemmeDF.columns.tolist()
         for i in range(len(list(seq))):
             for item in alphabeticalAminoAcidsList:
-                aaAndPosition.append(list(seq)[i]+str(i+1+offset)+item)
+                aaAndPosition.append(list(seq)[i]+str(i+1+args.offset)+item)
 
         data = np.array(list(zip(aaAndPosition, rawData)))
 

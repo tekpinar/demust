@@ -68,11 +68,11 @@ def main():
     maps_parser  = subparsers.add_parser('maps', description="Plots colored DMS maps.")
 
     maps_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
-        help='One of the output files of gemme, rhapsody or evmutation', \
+        help='One of the output files of gemme, pr/escott, rhapsody, evmutation', \
         required=True, default=None)
 
     maps_parser.add_argument('-d', '--datatype', dest='datatype', type=str, \
-        help='gemme, rhapsody, foldx, evmutation, proteingym, singleline', \
+        help='gemme, rhapsody, foldx, evmutation, proteingym, singleline or csvtable', \
         required=False, default='gemme')
 
     maps_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
@@ -390,6 +390,9 @@ def main():
     postprocess_parser.add_argument("-c", "--column", 
         help="An integer value for the data column to process.",
         dest="column", type=int,  required=False, default=2)
+    postprocess_parser.add_argument("--offset", 
+        help="An integer value to add the residue numbers to correct the residue numbering if it is shifted due to any reason.",
+        dest="offset", type=int,  required=False, default=0)
     postprocess_parser.add_argument("--process", \
         help="One of these options: ranksort, 1-ranksort, minmax, 1-minmax, 1-values, zscore, negzscore, attenuate, colrescaleraw, colrescaleranked or colrescalerankedminmax.", 
         dest="process", type=str,  required=True, default=None)
