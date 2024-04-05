@@ -381,7 +381,7 @@ def compareApp(args):
         plt.scatter(dataSet1, dataSet2, s=10, color="tab:orange")
         plt.title("Spearman Correlation: {:.3f}".format(correlation))
         plt.xlabel("DMS Score")
-        plt.ylabel("GEMME Score")
+        plt.ylabel("Score")
         plt.savefig("spearman2d.png")
 
         print("\nSpearman comparison of {} and {}: correlation={:.3f} ; pvalue={:.3E}\n".format(args.inputfile1, args.inputfile2, correlation, pvalue))
