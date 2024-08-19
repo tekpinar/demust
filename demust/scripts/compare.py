@@ -423,10 +423,13 @@ def compareApp(args):
         #if((args.itype == "gemme") and (args.jtype == "gemme")):
         correlation, pvalue = compareMapsSpearman(dataSet1, dataSet2)
         fig = plt.figure()
+        plt.rcParams.update({'font.size': 16})
         plt.scatter(dataSet1, dataSet2, s=10, color="tab:orange")
         plt.title("Spearman Correlation: {:.3f}".format(correlation))
         plt.xlabel(args.xlabel)
         plt.ylabel(args.ylabel)
+        plt.axis('square')
+        #plt.set_aspect('equal', adjustable='box')
         plt.savefig(args.outputfile+"-spearman2d.png")
 
         print("\nSpearman comparison of {} and {}: correlation={:.3f} ; pvalue={:.3E}\n".format(args.inputfile1, args.inputfile2, correlation, pvalue))
