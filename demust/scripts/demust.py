@@ -171,7 +171,7 @@ def main():
         help='Comparison metric.\n It can be spearman or pearson. Default is spearman', \
         required=False, default="spearman")
     compare_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
-        help='Name of the output file. Default is output.txt', \
+        help='Prefix of the output file. Default is output', \
         required=False, default='output.txt')
     compare_parser.add_argument('--msafile', dest='msafile', type=str, \
         help='An aligned multiple sequence alignment file in fasta format.', \
@@ -179,6 +179,12 @@ def main():
     compare_parser.add_argument('--ssfile', dest='ssfile', type=str, \
         help='An secondary structure file in plain text format.', \
         required=False, default=None)
+    compare_parser.add_argument('--xlabel', dest='xlabel', type=str, \
+        help='Label of x axis in spearman2d.png image.', \
+        required=False, default='DMS Score')
+    compare_parser.add_argument('--ylabel', dest='ylabel', type=str, \
+        help='Label of x axis in spearman2d.png image.', \
+        required=False, default='Score')
 
     #convert script argument parsing
     convert_parser = subparsers.add_parser('convert', description="Converts outputs of various formats.")

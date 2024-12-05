@@ -328,25 +328,68 @@ def compareApp(args):
     
         
 
-    debug = False
+    debug = True
     print("\nRunning 'demust compare' app...\n")
     if((args.itype == "gemme") and (args.jtype == "gemme")):
         dataSet1 = parseGEMMEoutput(args.inputfile1, verbose=False)
         dataSet2 = parseGEMMEoutput(args.inputfile2, verbose=False)
 
+    # elif((args.itype == "singleline") and (args.jtype == "singleline")):
+    #     with open(args.inputfile1, 'r') as file:
+    #         allExpLines = file.readlines()
+
+    #     if(debug):
+    #         print(allExpLines)
+
+    #     with open(args.inputfile2, 'r') as file:
+    #         allCompLines = file.readlines()
+
+    #     if(debug):
+    #         print(allCompLines)
+
+    #     # allExpTypedList = List()
+    #     # allCompTypedList = List()
+    #     # [allExpTypedList.append(x) for x in allExpLines]
+    #     # [allCompTypedList.append(x) for x in allCompLines]  
+    #     #dataSet1, dataSet2 = innerLoop(allExpTypedList, allCompTypedList, debug=True)
+    #     #dataSet1, dataSet2 = innerLoopV4(allExpLines, allCompLines, writeOutput=True, outfile="spearman.dat")
+    #     #dataSet1, dataSet2 = innerLoopV5(allExpLines, allCompLines, msafile=args.msafile, writeOutput=True, outfile="exp-vs-comp.txt")
+    #     dataSet1, dataSet2 = innerLoopV6(allExpLines, allCompLines, msafile=args.msafile, \
+    #                                     ssfile=args.ssfile, writeOutput=True, outfile=args.outputfile+"-exp-vs-comp.txt")
+    #     #dataSet1, dataSet2 = innerLoopV2(allExpTypedList, allCompTypedList, debug=True)
+        
+    #     # for line in allExpLines:
+    #     #     mutationE = line.split()[0]
+    #     #     for compline in allCompLines:
+    #     #         mutationC = compline.split()[0]
+    #     #         if(mutationE == mutationC) and (compline.split()[1] != 'NA'):
+    #     #             if(debug):
+    #     #                 print(mutationE, line.split()[1], compline.split()[1])
+    #     #             dataSet1.append(float(line.split()[1]))
+    #     #             dataSet2.append(float(compline.split()[1]))
+    #     print(len(dataSet1))
+    #     dataSet1 = np.array(dataSet1, dtype=float)
+    #     dataSet2 = np.array(dataSet2, dtype=float)
     elif((args.itype == "singleline") and (args.jtype == "singleline")):
-        with open(args.inputfile1, 'r') as file:
-            allExpLines = file.readlines()
+        import pandas as pd
+        # with open(args.inputfile1, 'r') as file:
+        #     allExpLines = file.readlines()
+        allExpDF = pd.read_csv(args.inputfile1, sep='\s+', header=None)
+        allExpDF.columns = ['variant', 'dms_score']
 
         if(debug):
-            print(allExpLines)
+            print(allExpDF)
 
-        with open(args.inputfile2, 'r') as file:
-            allCompLines = file.readlines()
+        # with open(args.inputfile2, 'r') as file:
+        #     allCompLines = file.readlines()
+        allCompDF = pd.read_csv(args.inputfile2, sep='\s+', header=None)
+        allCompDF.columns = ['variant', 'comp_score'] 
+
 
         if(debug):
-            print(allCompLines)
+            print(allCompDF)
 
+        mergedDF = pd.merge(allExpDF, allCompDF, on='variant')
         # allExpTypedList = List()
         # allCompTypedList = List()
         # [allExpTypedList.append(x) for x in allExpLines]
@@ -354,8 +397,8 @@ def compareApp(args):
         #dataSet1, dataSet2 = innerLoop(allExpTypedList, allCompTypedList, debug=True)
         #dataSet1, dataSet2 = innerLoopV4(allExpLines, allCompLines, writeOutput=True, outfile="spearman.dat")
         #dataSet1, dataSet2 = innerLoopV5(allExpLines, allCompLines, msafile=args.msafile, writeOutput=True, outfile="exp-vs-comp.txt")
-        dataSet1, dataSet2 = innerLoopV6(allExpLines, allCompLines, msafile=args.msafile, \
-                                        ssfile=args.ssfile, writeOutput=True, outfile="exp-vs-comp.txt")
+        # dataSet1, dataSet2 = innerLoopV6(allExpLines, allCompLines, msafile=args.msafile, \
+        #                                 ssfile=args.ssfile, writeOutput=True, outfile=args.outputfile+"-exp-vs-comp.txt")
         #dataSet1, dataSet2 = innerLoopV2(allExpTypedList, allCompTypedList, debug=True)
         
         # for line in allExpLines:
@@ -368,8 +411,10 @@ def compareApp(args):
         #             dataSet1.append(float(line.split()[1]))
         #             dataSet2.append(float(compline.split()[1]))
         
-        dataSet1 = np.array(dataSet1, dtype=float)
-        dataSet2 = np.array(dataSet2, dtype=float)
+        dataSet1 = mergedDF['dms_score'].to_numpy()
+        dataSet2 = mergedDF['comp_score'].to_numpy()
+        mergedDF.to_csv(args.outputfile+"-exp-vs-comp.txt", header=None, index=None, sep=' ')
+        print(len(dataSet1))
     else:
         print("@> ERROR: Unknown --itype or --jtype specified.")
         print("@>        It can be gemme or singleline!")
@@ -378,10 +423,13 @@ def compareApp(args):
         #if((args.itype == "gemme") and (args.jtype == "gemme")):
         correlation, pvalue = compareMapsSpearman(dataSet1, dataSet2)
         fig = plt.figure()
+        plt.rcParams.update({'font.size': 16})
         plt.scatter(dataSet1, dataSet2, s=10, color="tab:orange")
         plt.title("Spearman Correlation: {:.3f}".format(correlation))
-        plt.xlabel("DMS Score")
-        plt.ylabel("GEMME Score")
-        plt.savefig("spearman2d.png")
+        plt.xlabel(args.xlabel)
+        plt.ylabel(args.ylabel)
+        plt.axis('square')
+        #plt.set_aspect('equal', adjustable='box')
+        plt.savefig(args.outputfile+"-spearman2d.png")
 
         print("\nSpearman comparison of {} and {}: correlation={:.3f} ; pvalue={:.3E}\n".format(args.inputfile1, args.inputfile2, correlation, pvalue))
