@@ -178,7 +178,7 @@ def mapsApp(args):
         gemmeDF = pd.read_csv(args.inputfile, index_col=0)
         print(gemmeDF)
         matrix = gemmeDF.to_numpy()
-        print(matrix)
+        # print(matrix)
     
         expDataMatrix = matrix.T
         # sys.exit()

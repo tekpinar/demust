@@ -390,6 +390,33 @@ def compareApp(args):
             print(allCompDF)
 
         mergedDF = pd.merge(allExpDF, allCompDF, on='variant')
+                # ssfile is secondary structure file.
+        if(args.ssfile!=None):
+            #print("We have a secondary structure file!")
+            #Read secondary structure file
+            mydic = {}
+            with open(args.ssfile) as f:
+                for line in f:
+                    (key, val) = line.split(",")
+                    mydic[int(key)] = val
+
+            mergedDF['ss'] = ""
+            for index, row in mergedDF.iterrows():
+                if(':' in row['variant']):
+                    multipleMutation = row['variant'].split(":")
+                    #print(mydic)
+                    secStructureState=""
+                    for item in multipleMutation:
+                        mutPosition=int(item[1:-1])
+
+                        #print(mutPosition)
+                        #Add secondary structure information even for multiple point mutations
+                        #print(mydic[mutPosition])
+                        secStructureState +=mydic[mutPosition].strip()
+                    mergedDF.at[index, 'ss'] = secStructureState
+                else:
+                    mergedDF.at[index, 'ss'] = mydic[int(row['variant'][1:-1])].strip()
+
         # allExpTypedList = List()
         # allCompTypedList = List()
         # [allExpTypedList.append(x) for x in allExpLines]
@@ -413,7 +440,7 @@ def compareApp(args):
         
         dataSet1 = mergedDF['dms_score'].to_numpy()
         dataSet2 = mergedDF['comp_score'].to_numpy()
-        mergedDF.to_csv(args.outputfile+"-exp-vs-comp.txt", header=None, index=None, sep=' ')
+        mergedDF.to_csv(args.outputfile+"-exp-vs-comp.txt", float_format='%.8f', header=None, index=None, sep=' ')
         print(len(dataSet1))
     else:
         print("@> ERROR: Unknown --itype or --jtype specified.")
