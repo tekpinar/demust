@@ -405,19 +405,20 @@ def plotsApp(args):
             numberOfImageChunks = int(int(sequenceLength)/int(rowLength))
             
             for i in range(numberOfImageChunks):            
-                plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
-                    colorMap = 'turbo', \
-                    offSet=args.offset, pixelType='square',\
+                plot1DHeatMap(dataArray, args.outputfile+"_part_"+str(i+1), beg=i*rowLength + args.beginning, \
+                    end=(i+1)*rowLength + args.beginning -1, \
+                    colorMap = 'viridis_r', \
+                    offSet=i*rowLength + args.offset, pixelType='square',\
                     interactive=False, isColorBarOn=True)
             if(sequenceLength%rowLength != 0):
                 plot1DHeatMap(dataArray, args.outputfile+"_part_"+str(i+2), beg=(i+1)*rowLength + args.beginning, \
                                 end=args.end, \
-                                colorMap = 'viridis', \
+                                colorMap = 'viridis_r', \
                                 offSet=(i+1)*rowLength + args.offset, pixelType='square',\
                                 interactive=False, isColorBarOn=True)
         else:
             plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
-                colorMap = 'viridis', \
+                colorMap = 'viridis_r', \
                 offSet=args.offset, pixelType='square',\
                 interactive=False, isColorBarOn=True)
     else:
