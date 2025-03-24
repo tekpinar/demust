@@ -172,14 +172,9 @@ def mapsApp(args):
                                 colorMap = args.colormap, offSet=args.offset, \
                                 pixelType='square', aaOrder=args.aaorder, \
                                 sequence=args.sequence, interactive=False,\
-<<<<<<< HEAD
                                 isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible,\
                                 climmin=args.climmin, climmax=args.climmax)
-=======
-                                isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible)
     elif (args.datatype.lower()=='csvtable'):
->>>>>>> 0b79b73e7d9f399d2701904fac8c7b0bee54696b
-
         # expDataMatrix = parseSingleLineData(args.inputfile, \
         #                                     experiment="DMS_score",\
         #                                     outputcsv=None,\
@@ -205,14 +200,16 @@ def mapsApp(args):
                     (i+1)*rowLength + args.beginning -1,\
                     colorMap=args.colormap, offSet=i*rowLength + args.offset, pixelType='square',\
                     aaOrder=args.aaorder, sequence=args.sequence, interactive=False, \
-                    isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible)
+                    isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible,
+                    climmin=args.climmin, climmax=args.climmax)
             if(sequenceLength%rowLength != 0):
                 plotExperimentalMatrix(expDataMatrix, args.outputfile+"_part_"+str(i+2), \
                     (i+1)*rowLength + args.beginning, \
                     args.end,\
                     colorMap=args.colormap, offSet=(i+1)*rowLength + args.offset, pixelType='square',\
                     aaOrder=args.aaorder, sequence=args.sequence, interactive=False, \
-                    isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible)
+                    isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible,\
+                    climmin=args.climmin, climmax=args.climmax)
 
 
         else:    
@@ -223,7 +220,8 @@ def mapsApp(args):
                                 colorMap = args.colormap, offSet=args.offset, \
                                 pixelType='square', aaOrder=args.aaorder, \
                                 sequence=args.sequence, interactive=False,\
-                                isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible)
+                                isColorBarOn=args.iscolorbaron, onlyDNAaccessible=args.onlydnaaccessible,\
+                                climmin=args.climmin, climmax=args.climmax)
     else:
         print("\nError: Unknown data type!")
         print("         Data types can only be gemme, rhapsody or foldx!")
