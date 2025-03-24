@@ -158,7 +158,9 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
                     sequence=None,\
                     interactive=False,\
                     isColorBarOn=False,\
-                    onlyDNAaccessible=None):
+                    onlyDNAaccessible=None,\
+                    climmin=None,\
+                    climmax=None):
     """
         A function to plot deep mutational scanning matrices. 
   
@@ -207,205 +209,11 @@ def plotGEMMEmatrix(scanningMatrix, outFile, beg, end, \
         It will calculate mutations that are accessible from 'only' one 
         nucleotide change. The other locations will be shown as white. 
 
-    Returns
-    -------
-    Nothing
+    climmin: float
+        It is used to put a limit to minimum value of the colorbar. 
 
-    """
-
-    #We subtract 1 from beg bc matrix indices starts from 0
-    if(end == None):
-        end = len(scanningMatrix[0])
-        
-    print("Beginning: "+str(beg))
-    print("End      : "+str(end))
-    #print(scanningMatrix)
-    #np.reshape(scanningMatrix.flatten(), (20, 286))
-    #print(len(scanningMatrix[0]))
-
-    subMatrix = scanningMatrix[:, (beg-1):end]
-    #print(subMatrix)
-
-    ##########################################################################
-    # Set plotting parameters
-    nres_shown = len(subMatrix[0])
-    print(nres_shown)
-    fig_height=8
-    # figure proportions
-    fig_width = fig_height/2  # inches
-    fig_width *= nres_shown/20
-    
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-
-    if (nres_shown >150):
-        majorTics = 50
-    else:
-        majorTics = 20
-
-
-    major_nums_x = np.arange(majorTics, len(subMatrix[0]), majorTics, dtype=int)
-    #major_nums_x = major_nums_x -1
-    major_nums_x = np.insert(major_nums_x, 0, 0)
-    #print(major_nums_x)
-
-    minor_nums_x = np.arange(10, len(subMatrix[0]), 10, dtype=int)
-    #minor_nums_x = minor_nums_x - 1
-    minor_nums_x = np.insert(minor_nums_x, 0, 0)
-    #print(minor_nums_x)
-
-    major_labels_x = major_nums_x + 1 + offSet
-
-    major_nums_y = np.arange(0, 20, 1, dtype=int)
-    major_labels_y = list(aaOrder)
-
-    plt.xticks(major_nums_x, major_labels_x, size=28)
-    ax.set_xticks(minor_nums_x, minor=True)
-    
-    plt.yticks(major_nums_y, major_labels_y, size=16)
-    ax.set_yticklabels(major_labels_y, ha='left')
-    ax.tick_params(axis='y', which='major', pad=30)
-
-    # print(subMatrix)
-    #############################################################################
-    onlyDNAaccessibleList = []
-    current_cmap = matplotlib.cm.get_cmap()
-    current_cmap.set_bad(color='white')
-    if(sequence!=None):
-        mySeqFile = SeqIO.read(sequence, 'fasta')
-
-        # onylDNAaccessible = True
-        if(onlyDNAaccessible==True):
-            mySeqFile = SeqIO.read(sequence, 'fasta')
-            # print("I am plotting only DNA accessible mutations.")
-            #print(mySeqFile)
-            #Convert aaOrder to a list.
-            aaOrderList = list(aaOrder)
-            for i in range (len(subMatrix[0])):
-                j = beg-1+i
-                # print(i, aaOrderList.index(sequence[i]))
-                notInTheList = list(set(alphabeticalAminoAcidsList) - set(aaSingleNucleotideNeighborDict[mySeqFile.seq[j].upper()]))
-                notInTheList.remove(mySeqFile.seq[j].upper())
-                for item in notInTheList:
-                    # plt.scatter(i, aaOrderList.index(item), s=75, c='white', marker='x')
-                    #plt.scatter(i, aaOrderList.index(item), s=200, c='white', marker='s')
-                    onlyDNAaccessibleList.append([i, aaOrderList.index(item)])
-            for item in onlyDNAaccessibleList:
-                # print(item)
-                subMatrix[item[1]][item[0]] = np.nan
-    # print(subMatrix)
-    if(pixelType=='square'):
-        #For plotting square pixels
-        img = plt.imshow(subMatrix, cmap=colorMap)
-    elif(pixelType=='rectangle'):
-        #For plotting rectangular pixels
-        img = plt.imshow(subMatrix, cmap=colorMap, aspect=3.0)
-    else:
-        print("\nERROR: Unknown pixelType specified!\n")
-        sys.exit(-1)
-    
-    #To make the colors consistent if there are submatrices.
-    #plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
-    plt.clim([-5.0, 0.0])
-    if(sequence!=None):
-        mySeqFile = SeqIO.read(sequence, 'fasta')
-        #print(mySeqFile)
-        #Convert aaOrder to a list.
-        aaOrderList = list(aaOrder)
-        for i in range (len(subMatrix[0])):
-            j = beg-1+i
-            # print(i, aaOrderList.index(sequence[i]))
-            plt.scatter(i, aaOrderList.index(mySeqFile.seq[j].upper()), s=5, c='black', marker='o')
-
-
-        # if(onlyDNAaccessible==True):
-        #     mySeqFile = SeqIO.read(sequence, 'fasta')
-        #     onlyDNAaccessibleList = []
-        #     #print(mySeqFile)
-        #     #Convert aaOrder to a list.
-        #     aaOrderList = list(aaOrder)
-        #     for i in range (len(subMatrix[0])):
-        #         j = beg-1+i
-        #         # print(i, aaOrderList.index(sequence[i]))
-        #         notInTheList = list(set(alphabeticalAminoAcidsList) - set(aaSingleNucleotideNeighborDict[mySeqFile.seq[j].upper()]))
-        #         notInTheList.remove(mySeqFile.seq[j].upper())
-        #         for item in notInTheList:
-        #             # plt.scatter(i, aaOrderList.index(item), s=75, c='white', marker='x')
-        #             plt.scatter(i, aaOrderList.index(item), s=216, c='white', marker='s')
-        #             # onlyDNAaccessibleList.append([i, aaOrderList.index(item)])
-        # #     for item in onlyDNAaccessibleList:
-        # #         subMatrix[item[0]][item[1]] = np.nan
-
-
-    if(isColorBarOn):
-        from mpl_toolkits.axes_grid1 import make_axes_locatable
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size=fig_width/nres_shown, pad=0.2)
-        # plt.clim([-10.0, 2.0])
-        plt.colorbar(img, cax=cax)
-
-    plt.tight_layout()
-    plt.savefig(outFile+".png")
-    if(interactive):
-        plt.show()
-    
-
-    #plt.imsave('output.png', subMatrix)
-    plt.close()
-
-def plotGEMMEmatrixOld(scanningMatrix, outFile, beg, end, \
-                    colorMap = 'turbo_r', \
-                    offSet=0, pixelType='square',
-                    aaOrder="ACDEFGHIKLMNPQRSTVWY", \
-                    sequence=None,\
-                    interactive=False,\
-                    isColorBarOn=False,\
-                    onlyDNAaccessible=False):
-    """
-        A function to plot deep mutational scanning matrices. 
-  
-    Parameters
-    ----------
-    scanningMatrix: numpy array of arrays
-        Data matrix to plot
-
-    outFile: string
-        Name of the output image without file extension.
-        Default file extension (png) is added by the program
-    
-    beg: int
-        The first residue to use. It is used to select a subrange 
-        of amino acids. It starts from 1.
-    
-    end: int
-        The last residue to use. It is used to select a subrange 
-        of amino acids.
-
-    colorMap: matplotlib cmap
-        Any colormap existing in matplotlib.
-        Default is coolwarm. 
-
-    offSet: int
-        It is used to match the residue IDs in your PDB
-        file with 0 based indices read from scanningMatrix matrix
-
-    pixelType: string
-        It can only have 'square' or 'rectangle' values.
-        It is a matter of taste but I added it as an option.
-        Default is 'square'
-
-    sequence: string
-        A fasta file of one letter amino acid codes from N terminal to C terminal. 
-
-    interactive: bool
-        If True, it will plot the map interactively. 
-
-    isColorBarOn: bool
-        If True, it will show a colorbar to show the numerical scale of
-        the colors. Default is False. 
-
-    onlyDNAaccessible: bool
-        If True, it will show mutations that are accessible from 'only' one 
-        nucleotide mutations. The other locations will be shown as white. 
+    climmax: float
+        It is used to put an upper limit to maximum value of the colorbar. 
 
     Returns
     -------
@@ -504,8 +312,10 @@ def plotGEMMEmatrixOld(scanningMatrix, outFile, beg, end, \
         sys.exit(-1)
     
     #To make the colors consistent if there are submatrices.
-    #plt.clim(np.min(scanningMatrix), np.max(scanningMatrix)) 
-    plt.clim([-10.0, 2.0])
+    #plt.clim(np.min(scanningMatrix), np.max(scanningMatrix))
+    if((climmin!=None) and (climmax!=None)):
+        plt.clim([climmin, climmax])
+
     if(sequence!=None):
         mySeqFile = SeqIO.read(sequence, 'fasta')
         #print(mySeqFile)
@@ -925,192 +735,6 @@ def getMinMaxData(scanningMatrix, type, outfile, printDetails=False, ranksort=Tr
         FILE.close()
     return data
 
-
-
-def plotExperimentalMatrixOld(scanningMatrix, outFile, beg, end, \
-                    colorMap = 'coolwarm', \
-                    offSet=0, pixelType='square',
-                    aaOrder="ACDEFGHIKLMNPQRSTVWY", \
-                    sequence=None,\
-                    interactive=True,\
-                    isColorBarOn=False,\
-                    onlyDNAaccessible=False):
-    """
-        A function to plot deep mutational scanning data from
-        the Rieselamn dataset. 
-  
-    Parameters
-    ----------
-    scanningMatrix: numpy array of arrays
-        Data matrix to plot
-
-    outFile: string
-        Name of the output image without file extension.
-        Default file extension (png) is added by the program
-    
-    beg: int
-        The first residue to use. It is used to select a subrange 
-        of amino acids. It starts from 1.
-    
-    end: int
-        The last residue to use. It is used to select a subrange 
-        of amino acids.
-
-    colorMap: matplotlib cmap
-        Any colormap existing in matplotlib.
-        Default is coolwarm. 
-
-    offSet: int
-        It is used to match the residue IDs in your PDB
-        file with 0 based indices read from scanningMatrix matrix
-
-    pixelType: string
-        It can only have 'square' or 'rectangle' values.
-        It is a matter of taste but I added it as an option.
-        Default is 'square'
-
-    sequence: string
-        A fasta file of one letter amino acid codes from N terminal to C terminal. 
-
-    interactive: bool
-        If True, it will plot the map interactively. 
-
-    isColorBarOn: bool
-        If True, it will show a colorbar to show the numerical scale of
-        the colors. Default is False.
-    onlyDNAaccessible: bool
-        If True, it will show mutations that are accessible from 'only' one 
-        nucleotide mutations. The other locations will be shown as white. 
-
-    Returns
-    -------
-    Nothing
-
-    """
-
-    scanningMatrix = np.ma.array (scanningMatrix, mask=np.isnan(scanningMatrix))
-
-    #We subtract 1 from beg bc matrix indices starts from 0
-    if(end == None):
-        end = len(scanningMatrix[0])
-
-    print("Beginning: "+str(beg))
-    print("End      : "+str(end))
-    
-    print(len(scanningMatrix[0]))
-    subMatrix = scanningMatrix[:, (beg-1):end]
-    #print(subMatrix)
-
-    ##########################################################################
-    # Set plotting parameters
-    nres_shown = len(subMatrix[0])
-    fig_height=8
-    # figure proportions
-    fig_width = fig_height/2  # inches
-    fig_width *= nres_shown/20
-    
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-
-    if (nres_shown >150):
-        majorTics = 50
-    else:
-        majorTics = 20
-
-
-    major_nums_x = np.arange(majorTics, len(subMatrix[0]), majorTics, dtype=int)
-    #major_nums_x = major_nums_x -1
-    major_nums_x = np.insert(major_nums_x, 0, 0)
-    #print(major_nums_x)
-
-    minor_nums_x = np.arange(10, len(subMatrix[0]), 10, dtype=int)
-    #minor_nums_x = minor_nums_x - 1
-    minor_nums_x = np.insert(minor_nums_x, 0, 0)
-    #print(minor_nums_x)
-
-    major_labels_x = major_nums_x + 1 + offSet
-
-    major_nums_y = np.arange(0, 20, 1, dtype=int)
-    major_labels_y = list(aaOrder)
-
-    plt.xticks(major_nums_x, major_labels_x, size=28)
-    ax.set_xticks(minor_nums_x, minor=True)
-    
-    plt.yticks(major_nums_y, major_labels_y, size=16)
-    ax.set_yticklabels(major_labels_y, ha='left')
-    ax.tick_params(axis='y', which='major', pad=30)
-
-    #############################################################################
-    onlyDNAaccessibleList = []
-    current_cmap = matplotlib.cm.get_cmap()
-    current_cmap.set_bad(color='white')
-    if(sequence!=None):
-        mySeqFile = SeqIO.read(sequence, 'fasta')
-
-        # onylDNAaccessible = True
-        if(onlyDNAaccessible==True):
-            mySeqFile = SeqIO.read(sequence, 'fasta')
-            print("I am plotting only DNA accessible mutations.")
-            #print(mySeqFile)
-            #Convert aaOrder to a list.
-            aaOrderList = list(aaOrder)
-            for i in range (len(subMatrix[0])):
-                j = beg-1+i
-                # print(i, aaOrderList.index(sequence[i]))
-                notInTheList = list(set(alphabeticalAminoAcidsList) - set(aaSingleNucleotideNeighborDict[mySeqFile.seq[j].upper()]))
-                notInTheList.remove(mySeqFile.seq[j].upper())
-                for item in notInTheList:
-                    # plt.scatter(i, aaOrderList.index(item), s=75, c='white', marker='x')
-                    #plt.scatter(i, aaOrderList.index(item), s=200, c='white', marker='s')
-                    onlyDNAaccessibleList.append([i, aaOrderList.index(item)])
-            for item in onlyDNAaccessibleList:
-                # print(item)
-                subMatrix[item[1]][item[0]] = np.nan
-    #############################################################################
-    if(pixelType=='square'):
-        #For plotting square pixels
-        img = plt.imshow(subMatrix, cmap=colorMap)
-    elif(pixelType=='rectangle'):
-        #For plotting rectangular pixels
-        img = plt.imshow(subMatrix, cmap=colorMap, aspect=3.0)
-    else:
-        print("\nERROR: Unknown pixelType specified!\n")
-        sys.exit(-1)
-    
-    #To make the colors consistent if there are submatrices.
-    # plt.clim(np.min(scanningMatrix), np.max(scanningMatrix))
-
-    #This value here does not make sense if you are really plotting experimental data.
-    #I had to do this to make the colors consistent to plot only DNA accessible mutations.
-    #The source data for them is frequency modifed ESGEMME scores and they are typically 
-    #between -10 and 2.
-    #plt.clim([-6.0, 0.0]) 
-    #plt.clim([-10.0, 2.0]) 
-
-    if(sequence!=None):
-        mySeqFile = SeqIO.read(sequence, 'fasta')
-        #Convert aaOrder to a list.
-        aaOrderList = list(aaOrder)
-        for i in range (len(subMatrix[0])):
-            j = beg-1+i
-            # print(i, aaOrderList.index(sequence[i]))
-            plt.scatter(i, aaOrderList.index(mySeqFile.seq[j].upper()), s=5, c='black', marker='o')
-    
-    if(isColorBarOn):
-        from mpl_toolkits.axes_grid1 import make_axes_locatable
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size=fig_width/nres_shown, pad=0.2)
-        # plt.clim([-10.0, 2.0])
-        plt.colorbar(img, cax=cax)
-
-    plt.tight_layout()
-    plt.savefig(outFile+".png")
-    if(interactive):
-        plt.show()
-    
-
-    #plt.imsave('output.png', subMatrix)
-    plt.close()
-
 def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
                     colorMap = 'coolwarm', \
                     offSet=0, pixelType='square',
@@ -1118,7 +742,9 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
                     sequence=None,\
                     interactive=True,\
                     isColorBarOn=False,\
-                    onlyDNAaccessible=None):
+                    onlyDNAaccessible=None,\
+                    climmin=None,\
+                    climmax=None):
     """
         A function to plot deep mutational scanning data from
         the Rieselamn dataset. 
@@ -1162,10 +788,17 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
     isColorBarOn: bool
         If True, it will show a colorbar to show the numerical scale of
         the colors. Default is False.
+        
     onlyDNAaccessible: string
         If it is not None, you must provide a DNA sequence of the protein. 
         It will calculate mutations that are accessible from 'only' one 
         nucleotide change. The other locations will be shown as white. 
+
+    climmin: float
+        It is used to put a limit to minimum value of the colorbar. 
+
+    climmax: float
+        It is used to put an upper limit to maximum value of the colorbar. 
 
     Returns
     -------
@@ -1275,10 +908,8 @@ def plotExperimentalMatrix(scanningMatrix, outFile, beg, end, \
     #I had to do this to make the colors consistent to plot only DNA accessible mutations.
     #The source data for them is frequency modifed ESGEMME scores and they are typically 
     #between -10 and 2.
-    #plt.clim([-6.0, 0.0]) #For frequencies
-    plt.clim([0.0, 1.0]) #For ranksorted or normalized data
-    #plt.clim([-10.0, 2.0]) #For raw ESCOTT data
-    #plt.clim([-20.0, 0.0]) #For ESM1b (esm_variant) data 
+    if((climmin!=None) and (climmax!=None)):
+        plt.clim([climmin, climmax])
 
     if(sequence!=None):
         mySeqFile = SeqIO.read(sequence, 'fasta')

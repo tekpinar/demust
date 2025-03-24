@@ -123,6 +123,14 @@ def main():
         help='A DNA sequence file exatly matching to the protein sequence. Default is None.',
         required=False, default=None)
 
+    maps_parser.add_argument('--climmin', dest='climmin', type=float, \
+        help='Puts a limit to minimum value of the colorbar.', \
+        required=False, default=None)
+    
+    maps_parser.add_argument('--climmax', dest='climmax', type=float, \
+        help='Puts a limit to maximum value of the colorbar.', \
+        required=False, default=None)
+    
     #plots script argument parsing
     plots_parser = subparsers.add_parser('plots', \
         description="Can plot 2D data: 'min, max or average from DMS maps' or 'trace, pc or cv from JET files.")
