@@ -68,11 +68,11 @@ def main():
     maps_parser  = subparsers.add_parser('maps', description="Plots colored DMS maps.")
 
     maps_parser.add_argument('-i', '--inputfile', dest='inputfile', type=str, \
-        help='One of the output files of gemme, rhapsody or evmutation', \
+        help='One of the output files of gemme, pr/escott, rhapsody, evmutation', \
         required=True, default=None)
 
     maps_parser.add_argument('-d', '--datatype', dest='datatype', type=str, \
-        help='gemme, rhapsody, foldx, evmutation, proteingym, singleline', \
+        help='gemme, rhapsody, foldx, evmutation, proteingym, singleline or csvtable', \
         required=False, default='gemme')
 
     maps_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
@@ -179,7 +179,7 @@ def main():
         help='Comparison metric.\n It can be spearman or pearson. Default is spearman', \
         required=False, default="spearman")
     compare_parser.add_argument('-o', '--outputfile', dest='outputfile', type=str, \
-        help='Name of the output file. Default is output.txt', \
+        help='Prefix of the output file. Default is output', \
         required=False, default='output.txt')
     compare_parser.add_argument('--msafile', dest='msafile', type=str, \
         help='An aligned multiple sequence alignment file in fasta format.', \
@@ -187,6 +187,12 @@ def main():
     compare_parser.add_argument('--ssfile', dest='ssfile', type=str, \
         help='An secondary structure file in plain text format.', \
         required=False, default=None)
+    compare_parser.add_argument('--xlabel', dest='xlabel', type=str, \
+        help='Label of x axis in spearman2d.png image.', \
+        required=False, default='DMS Score')
+    compare_parser.add_argument('--ylabel', dest='ylabel', type=str, \
+        help='Label of x axis in spearman2d.png image.', \
+        required=False, default='Score')
 
     #convert script argument parsing
     convert_parser = subparsers.add_parser('convert', description="Converts outputs of various formats.")
@@ -398,6 +404,9 @@ def main():
     postprocess_parser.add_argument("-c", "--column", 
         help="An integer value for the data column to process.",
         dest="column", type=int,  required=False, default=2)
+    postprocess_parser.add_argument("--offset", 
+        help="An integer value to add the residue numbers to correct the residue numbering if it is shifted due to any reason.",
+        dest="offset", type=int,  required=False, default=0)
     postprocess_parser.add_argument("--process", \
         help="One of these options: ranksort, 1-ranksort, minmax, 1-minmax, 1-values, zscore, negzscore, attenuate, colrescaleraw, colrescaleranked or colrescalerankedminmax.", 
         dest="process", type=str,  required=True, default=None)

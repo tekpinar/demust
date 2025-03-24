@@ -394,9 +394,32 @@ def plotsApp(args):
         dataArray = (df[1].to_numpy())
         if(debug):
             print(dataArray)
-        plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
-                    colorMap = 'rainbow', \
-                    offSet=args.offset, pixelType='rectangle',\
+
+        if(args.end == None):
+            args.end = len(dataArray)
+            print("Length of data array"+str(args.end))
+        if(args.paginate!=0):
+            sequenceLength = (args.end - args.beginning - 1) # -1 is for starting the count from 0. 
+
+            rowLength = args.paginate
+            numberOfImageChunks = int(int(sequenceLength)/int(rowLength))
+            
+            for i in range(numberOfImageChunks):            
+                plot1DHeatMap(dataArray, args.outputfile+"_part_"+str(i+1), beg=i*rowLength + args.beginning, \
+                    end=(i+1)*rowLength + args.beginning -1, \
+                    colorMap = 'viridis_r', \
+                    offSet=i*rowLength + args.offset, pixelType='square',\
                     interactive=False, isColorBarOn=True)
+            if(sequenceLength%rowLength != 0):
+                plot1DHeatMap(dataArray, args.outputfile+"_part_"+str(i+2), beg=(i+1)*rowLength + args.beginning, \
+                                end=args.end, \
+                                colorMap = 'viridis_r', \
+                                offSet=(i+1)*rowLength + args.offset, pixelType='square',\
+                                interactive=False, isColorBarOn=True)
+        else:
+            plot1DHeatMap(dataArray, args.outputfile, beg=args.beginning, end=args.end, \
+                colorMap = 'viridis_r', \
+                offSet=args.offset, pixelType='square',\
+                interactive=False, isColorBarOn=True)
     else:
         print("ERROR: Unknown data type: {}.".format(args.datatype))
